@@ -12,13 +12,12 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { formatCurrency } from '@/utils/formatDate';
 import type { Holding } from '@/types/portfolio';
 
-interface PortfolioAllocationChartProps {
+interface SectorAllocationChartProps {
   holdings: Holding[] | undefined;
   totalValue: number;
   isLoading: boolean;
 }
 
-// Color palette matching Finance Copilot theme
 const COLORS = [
   '#8b5cf6', // purple-500
   '#06b6d4', // cyan-500
@@ -28,17 +27,14 @@ const COLORS = [
   '#6366f1', // indigo-500
   '#ec4899', // pink-500
   '#14b8a6', // teal-500
-  '#f97316', // orange-500
-  '#06b6d4', // cyan-600
 ];
 
-// Custom tooltip with dark theme styling
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
-    const data = payload[0].payload as AllocationData;
+    const data = payload[0].payload as SectorData;
     return (
       <div className="bg-surface border border-white/10 rounded-lg p-3 shadow-lg">
-        <p className="text-sm font-semibold text-white">{data.symbol}</p>
+        <p className="text-sm font-semibold text-white">{data.sector}</p>
         <p className="text-xs text-white/70 mt-1">
           Value: {formatCurrency(data.value)}
         </p>
@@ -51,36 +47,43 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   return null;
 }
 
-interface AllocationData {
-  symbol: string;
+interface SectorData {
+  sector: string;
   value: number;
   percentage: number;
 }
 
-export function PortfolioAllocationChart({
+export function SectorAllocationChart({
   holdings,
   totalValue,
   isLoading,
-}: PortfolioAllocationChartProps) {
-  // Calculate allocation data from holdings
+}: SectorAllocationChartProps) {
   const allocationData = useMemo(() => {
     if (!holdings || holdings.length === 0 || totalValue === 0) {
       return [];
     }
 
-    return holdings.map((holding) => ({
-      symbol: holding.symbol,
-      value: holding.current_value,
-      percentage: (holding.current_value / totalValue) * 100,
+    // Group by sector
+    const sectorMap = new Map<string, number>();
+    holdings.forEach((holding) => {
+      const sector = holding.sector || 'Unclassified';
+      const current = sectorMap.get(sector) || 0;
+      sectorMap.set(sector, current + holding.current_value);
+    });
+
+    // Convert to array
+    return Array.from(sectorMap.entries()).map(([sector, value]) => ({
+      sector,
+      value,
+      percentage: (value / totalValue) * 100,
     }));
   }, [holdings, totalValue]);
 
-  // Loading state
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Portfolio Allocation</CardTitle>
+          <CardTitle>Sector Allocation</CardTitle>
         </CardHeader>
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
@@ -92,16 +95,15 @@ export function PortfolioAllocationChart({
     );
   }
 
-  // Empty state
   if (!holdings || holdings.length === 0 || totalValue === 0) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Portfolio Allocation</CardTitle>
+          <CardTitle>Sector Allocation</CardTitle>
         </CardHeader>
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
-            <p className="text-sm text-white/50">No holdings to display</p>
+            <p className="text-sm text-white/50">No sectors to display</p>
           </div>
         </div>
       </Card>
@@ -111,32 +113,18 @@ export function PortfolioAllocationChart({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle>Portfolio Allocation</CardTitle>
-            <p className="text-xs text-white/50 mt-1">
-              Distribution by current value
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-white/50 font-medium mb-1">Total Value</p>
-            <p className="text-lg font-bold text-brand-400">
-              {formatCurrency(totalValue)}
-            </p>
-          </div>
-        </div>
+        <CardTitle>Sector Allocation</CardTitle>
       </CardHeader>
 
       <div className="px-4 pb-4">
-        {/* Responsive pie chart */}
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
               data={allocationData}
               cx="50%"
               cy="50%"
-              outerRadius={80}
-              innerRadius={50}
+              outerRadius={70}
+              innerRadius={40}
               fill="#8884d8"
               dataKey="value"
             >
@@ -152,8 +140,8 @@ export function PortfolioAllocationChart({
               verticalAlign="bottom"
               height={36}
               formatter={(_, entry) => {
-                const data = entry.payload as unknown as AllocationData;
-                return `${data.symbol} (${data.percentage.toFixed(1)}%)`;
+                const data = entry.payload as unknown as SectorData;
+                return `${data.sector} (${data.percentage.toFixed(1)}%)`;
               }}
               wrapperStyle={{
                 paddingTop: '16px',
@@ -162,20 +150,23 @@ export function PortfolioAllocationChart({
           </PieChart>
         </ResponsiveContainer>
 
-        {/* Allocation table */}
+        {/* Breakdown table */}
         <div className="mt-6 space-y-2">
           <p className="text-xs font-medium text-white/50 uppercase tracking-wider">
             Breakdown
           </p>
           <div className="space-y-2">
             {allocationData.map((item, index) => (
-              <div key={item.symbol} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+              <div
+                key={item.sector}
+                className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+              >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-3 h-3 rounded-full flex-shrink-0"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
-                  <p className="text-sm font-medium text-white">{item.symbol}</p>
+                  <p className="text-sm font-medium text-white">{item.sector}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-white">

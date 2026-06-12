@@ -22,6 +22,9 @@ import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { PortfolioAllocationChart } from '@/components/portfolio/PortfolioAllocationChart';
+import { SectorAllocationChart } from '@/components/portfolio/SectorAllocationChart';
+import { TopHoldingsWidget } from '@/components/portfolio/TopHoldingsWidget';
+import { PortfolioInsights } from '@/components/portfolio/PortfolioInsights';
 import { portfolioApi } from '@/api/portfolio';
 import { formatCurrency } from '@/utils/formatDate';
 import type { Holding, HoldingUpdate } from '@/types/portfolio';
@@ -376,6 +379,32 @@ export function PortfolioPage() {
         />
       )}
 
+      {/* Sector Allocation + Top Holdings Row */}
+      {hasHoldings && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SectorAllocationChart
+            holdings={holdingsData?.items}
+            totalValue={summary?.total_portfolio_value ?? 0}
+            isLoading={holdingsLoading}
+          />
+          <TopHoldingsWidget
+            holdings={holdingsData?.items}
+            isLoading={holdingsLoading}
+          />
+        </div>
+      )}
+
+      {/* Portfolio Insights */}
+      {hasHoldings && (
+        <PortfolioInsights
+          holdings={holdingsData?.items}
+          totalValue={summary?.total_portfolio_value ?? 0}
+          diversificationScore={diversification?.score}
+          riskScore={risk?.score}
+          isLoading={holdingsLoading}
+        />
+      )}
+
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Holdings Table */}
@@ -429,24 +458,26 @@ export function PortfolioPage() {
                     key={holding.id}
                     className="p-4 rounded-xl border border-white/10 hover:border-white/20 hover:bg-surface-hover transition-all"
                   >
-                    {/* Header Row: Symbol, Company, Badges */}
-                    <div className="flex items-start justify-between mb-3">
+                    {/* Header Row: Symbol, Company */}
+                    <div className="flex items-start justify-between mb-2">
                       <div className="flex-1 min-w-0 pr-4">
                         <p className="text-sm font-semibold text-white">{holding.symbol}</p>
                         <p className="text-xs text-white/50 mt-0.5">
                           {holding.company_name}
                         </p>
                       </div>
-                      <div className="flex gap-2 flex-wrap justify-end">
-                        <Badge variant="brand" className="text-xs">
-                          {holding.asset_type.charAt(0).toUpperCase() + holding.asset_type.slice(1).replace('_', ' ')}
+                    </div>
+
+                    {/* Asset Type and Sector Row */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="brand" className="text-xs">
+                        {holding.asset_type.charAt(0).toUpperCase() + holding.asset_type.slice(1).replace('_', ' ')}
+                      </Badge>
+                      {holding.sector && (
+                        <Badge variant="default" className="text-xs">
+                          {holding.sector}
                         </Badge>
-                        {holding.sector && (
-                          <Badge variant="default" className="text-xs">
-                            {holding.sector}
-                          </Badge>
-                        )}
-                      </div>
+                      )}
                     </div>
 
                     {/* Details Grid */}
