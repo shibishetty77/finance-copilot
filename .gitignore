@@ -1,0 +1,14 @@
+# Finance Copilot — Project Root Ignores
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Env files (NEVER commit real secrets)
+.env
+*.env
+!**/.env.example
