@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
+import { PortfolioAllocationChart } from '@/components/portfolio/PortfolioAllocationChart';
 import { portfolioApi } from '@/api/portfolio';
 import { formatCurrency } from '@/utils/formatDate';
 import type { Holding, HoldingUpdate } from '@/types/portfolio';
@@ -365,6 +366,15 @@ export function PortfolioPage() {
           color="bg-brand-600"
         />
       </div>
+
+      {/* Portfolio Allocation Chart */}
+      {hasHoldings && (
+        <PortfolioAllocationChart
+          holdings={holdingsData?.items}
+          totalValue={summary?.total_portfolio_value ?? 0}
+          isLoading={holdingsLoading}
+        />
+      )}
 
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
