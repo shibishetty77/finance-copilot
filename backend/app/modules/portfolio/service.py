@@ -245,7 +245,7 @@ class PortfolioService:
         if summary["total_portfolio_value"] > 0:
             holdings, _ = await self.repo.list_holdings(user_id, page=1, page_size=100)
             if holdings:
-                max_holding_value = max(h.current_value for h in holdings)
+                max_holding_value = max(float(h.current_value) for h in holdings)
                 max_holding_pct = (max_holding_value / summary["total_portfolio_value"]) * 100
                 exposure_score = max(25 - (max_holding_pct - 30) * 0.5, 0) if max_holding_pct > 30 else 25
                 factors["single_holding_exposure"] = exposure_score
@@ -298,7 +298,7 @@ class PortfolioService:
         if summary["total_portfolio_value"] > 0:
             holdings, _ = await self.repo.list_holdings(user_id, page=1, page_size=100)
             if holdings:
-                max_holding_value = max(h.current_value for h in holdings)
+                max_holding_value = max(float(h.current_value) for h in holdings)
                 max_holding_pct = (max_holding_value / summary["total_portfolio_value"]) * 100
                 concentration_score = max_holding_pct * 0.3
                 factors["concentration_risk"] = concentration_score
@@ -347,7 +347,7 @@ class PortfolioService:
                 "id": analytics["biggest_holding"].id,
                 "symbol": analytics["biggest_holding"].symbol,
                 "company_name": analytics["biggest_holding"].company_name,
-                "current_value": analytics["biggest_holding"].current_value,
+                "current_value": float(analytics["biggest_holding"].current_value),
                 "percentage": 0,  # Will be calculated in service
             }
 
@@ -369,8 +369,8 @@ class PortfolioService:
             first_snapshot = min(snapshots, key=lambda s: s.created_at)
             first_investment = Milestone(
                 type="first_investment",
-                value=first_snapshot.portfolio_value,
-                achieved_at=first_snapshot.created_at,
+                value=float(first_snapshot.portfolio_value),
+                achieved_at=first_snapshot.created_at.date(),
             )
 
         # Find milestone crossings
@@ -383,8 +383,8 @@ class PortfolioService:
                     if threshold not in crossed_milestones:
                         crossed_milestones[threshold] = Milestone(
                             type=f"crossed_{threshold}",
-                            value=snapshot.portfolio_value,
-                            achieved_at=snapshot.created_at,
+                            value=float(snapshot.portfolio_value),
+                            achieved_at=snapshot.created_at.date(),
                         )
 
         # Find largest gain/loss
@@ -394,21 +394,21 @@ class PortfolioService:
         for i in range(1, len(snapshots)):
             prev = snapshots[i - 1]
             curr = snapshots[i]
-            gain = curr.gain_loss - prev.gain_loss
+            gain = float(curr.gain_loss) - float(prev.gain_loss)
 
             if gain > 0:
                 if largest_gain is None or gain > largest_gain.value:
                     largest_gain = Milestone(
                         type="largest_gain",
                         value=gain,
-                        achieved_at=curr.created_at,
+                        achieved_at=curr.created_at.date(),
                     )
             else:
                 if largest_loss is None or gain < largest_loss.value:
                     largest_loss = Milestone(
                         type="largest_loss",
                         value=gain,
-                        achieved_at=curr.created_at,
+                        achieved_at=curr.created_at.date(),
                     )
 
         return MilestonesResponse(

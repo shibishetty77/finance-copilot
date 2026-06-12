@@ -223,7 +223,7 @@ class PortfolioRepository:
 
         allocation = []
         for row in result.all():
-            percentage = (row.total_value / total_value * 100) if total_value > 0 else 0
+            percentage = float((row.total_value / total_value * 100) if total_value > 0 else 0)
             allocation.append(
                 {
                     "asset_type": row.asset_type,
@@ -253,7 +253,7 @@ class PortfolioRepository:
 
         allocation = []
         for row in result.all():
-            percentage = (row.total_value / total_value * 100) if total_value > 0 else 0
+            percentage = float((row.total_value / total_value * 100) if total_value > 0 else 0)
             allocation.append(
                 {
                     "sector": row.sector,
