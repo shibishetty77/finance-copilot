@@ -37,7 +37,7 @@ function StatCard({
       {trend !== undefined && (
         <div className={`flex items-center gap-1 mt-1 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
           {trend >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-          {Math.abs(trend)}% vs last month
+          {Math.abs(trend).toFixed(2)}% vs last month
         </div>
       )}
     </Card>
