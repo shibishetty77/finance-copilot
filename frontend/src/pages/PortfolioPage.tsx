@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
+import { Badge } from '@/components/ui/Badge';
 import { portfolioApi } from '@/api/portfolio';
 import { formatCurrency } from '@/utils/formatDate';
 import type { Holding, HoldingUpdate } from '@/types/portfolio';
@@ -416,40 +417,77 @@ export function PortfolioPage() {
                 holdingsData?.items.map((holding) => (
                   <div
                     key={holding.id}
-                    className="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-hover transition-colors"
+                    className="p-4 rounded-xl border border-white/10 hover:border-white/20 hover:bg-surface-hover transition-all"
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white">{holding.symbol}</p>
-                      <p className="text-xs text-white/50">
-                        {holding.company_name || holding.asset_type}
-                      </p>
+                    {/* Header Row: Symbol, Company, Badges */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <p className="text-sm font-semibold text-white">{holding.symbol}</p>
+                        <p className="text-xs text-white/50 mt-0.5">
+                          {holding.company_name}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 flex-wrap justify-end">
+                        <Badge variant="brand" className="text-xs">
+                          {holding.asset_type.charAt(0).toUpperCase() + holding.asset_type.slice(1).replace('_', ' ')}
+                        </Badge>
+                        {holding.sector && (
+                          <Badge variant="default" className="text-xs">
+                            {holding.sector}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-white">
-                        {formatCurrency(holding.current_value)}
-                      </p>
-                      <p
-                        className={`text-xs ${
-                          holding.gain_loss >= 0 ? 'text-income' : 'text-expense'
-                        }`}
-                      >
-                        {holding.gain_loss >= 0 ? '+' : ''}
-                        {formatCurrency(holding.gain_loss)}
-                      </p>
+
+                    {/* Details Grid */}
+                    <div className="grid grid-cols-4 gap-4 mb-3 pb-3 border-b border-white/5">
+                      <div>
+                        <p className="text-xs text-white/50 font-medium mb-1">Quantity</p>
+                        <p className="text-sm font-semibold text-white">{holding.quantity.toLocaleString('en-IN')}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/50 font-medium mb-1">Avg Buy Price</p>
+                        <p className="text-sm font-semibold text-white">{formatCurrency(holding.average_buy_price)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/50 font-medium mb-1">Current Price</p>
+                        <p className="text-sm font-semibold text-white">{formatCurrency(holding.current_price)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-white/50 font-medium mb-1">Current Value</p>
+                        <p className="text-sm font-semibold text-white">{formatCurrency(holding.current_value)}</p>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        leftIcon={<Edit2 className="w-3 h-3" />}
-                        onClick={() => openEditModal(holding)}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        leftIcon={<Trash2 className="w-3 h-3" />}
-                        onClick={() => openDeleteModal(holding)}
-                      />
+
+                    {/* Footer Row: Gain/Loss and Actions */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p
+                          className={`text-sm font-semibold ${
+                            holding.gain_loss >= 0 ? 'text-income' : 'text-expense'
+                          }`}
+                        >
+                          {holding.gain_loss >= 0 ? '+' : ''}
+                          {formatCurrency(holding.gain_loss)}
+                          <span className="text-xs font-medium ml-2">
+                            ({holding.gain_loss >= 0 ? '+' : ''}{holding.gain_loss_percent.toFixed(2)}%)
+                          </span>
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          leftIcon={<Edit2 className="w-3 h-3" />}
+                          onClick={() => openEditModal(holding)}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          leftIcon={<Trash2 className="w-3 h-3" />}
+                          onClick={() => openDeleteModal(holding)}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))
