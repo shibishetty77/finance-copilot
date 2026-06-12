@@ -84,6 +84,17 @@ class HoldingResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    @field_validator("tags", mode="before")
+    @classmethod
+    def parse_tags(cls, v: Any) -> list[str] | None:
+        if isinstance(v, str):
+            import json
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return None
+        return v
+
 
 class HoldingPaginationResponse(BaseModel):
     """Schema for paginated holdings response."""

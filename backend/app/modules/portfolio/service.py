@@ -1,7 +1,7 @@
 """
 Portfolio service — business logic for holdings, watchlist, and portfolio metrics.
 """
-
+import json
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,12 +55,6 @@ class PortfolioService:
             tags=payload.tags,
         )
 
-        # Deserialize tags from JSON string to list for response validation
-        if holding.tags and isinstance(holding.tags, str):
-            try:
-                holding.tags = json.loads(holding.tags)
-            except json.JSONDecodeError:
-                holding.tags = None
 
         # Create portfolio snapshot
         summary = await self.repo.get_portfolio_summary(user_id)
@@ -79,13 +73,7 @@ class PortfolioService:
         if not holding:
             raise NotFoundError("Holding")
         
-        # Deserialize tags from JSON string to list for response validation
-        if holding.tags and isinstance(holding.tags, str):
-            try:
-                holding.tags = json.loads(holding.tags)
-            except json.JSONDecodeError:
-                holding.tags = None
-        
+
         return HoldingResponse.model_validate(holding)
 
     async def list_holdings(
@@ -109,13 +97,6 @@ class PortfolioService:
 
         total_pages = (total + page_size - 1) // page_size if total > 0 else 0
 
-        # Deserialize tags from JSON string to list for each holding
-        for holding in holdings:
-            if holding.tags and isinstance(holding.tags, str):
-                try:
-                    holding.tags = json.loads(holding.tags)
-                except json.JSONDecodeError:
-                    holding.tags = None
 
         return HoldingPaginationResponse(
             total=total,
@@ -171,27 +152,12 @@ class PortfolioService:
 
         if not values:
             print(f"[UPDATE HOLDING] SERVICE: No values to update, returning existing")
-            # Deserialize tags from JSON string to list for response validation
-            if existing.tags and isinstance(existing.tags, str):
-                try:
-                    existing.tags = json.loads(existing.tags)
-                except json.JSONDecodeError:
-                    existing.tags = None
             return HoldingResponse.model_validate(existing)
 
         print(f"[UPDATE HOLDING] SERVICE: Calling repository.update_holding")
         updated = await self.repo.update_holding(holding_id, user_id, values)
         print(f"[UPDATE HOLDING] SERVICE: Repository returned updated holding: id={updated.id}, symbol={updated.symbol}")
 
-        # Deserialize tags from JSON string to list for response validation
-        print(f"[UPDATE HOLDING] SERVICE: Before deserialization - tags={updated.tags}, type={type(updated.tags)}")
-        if updated.tags and isinstance(updated.tags, str):
-            try:
-                updated.tags = json.loads(updated.tags)
-                print(f"[UPDATE HOLDING] SERVICE: After deserialization - tags={updated.tags}, type={type(updated.tags)}")
-            except json.JSONDecodeError as e:
-                print(f"[UPDATE HOLDING] SERVICE: JSON decode error: {e}")
-                updated.tags = None
 
         # Create portfolio snapshot after update
         print(f"[UPDATE HOLDING] SERVICE: Creating portfolio snapshot")

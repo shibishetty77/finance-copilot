@@ -131,9 +131,9 @@ class PortfolioRepository:
                 print(f"[UPDATE HOLDING] REPOSITORY: Holding not found")
                 raise ValueError("Holding not found")
 
-            quantity = values.get("quantity", holding.quantity)
-            average_buy_price = values.get("average_buy_price", holding.average_buy_price)
-            current_price = values.get("current_price", holding.current_price)
+            quantity = float(values.get("quantity", holding.quantity))
+            average_buy_price = float(values.get("average_buy_price", holding.average_buy_price))
+            current_price = float(values.get("current_price", holding.current_price))
 
             values["invested_amount"] = quantity * average_buy_price
             values["current_value"] = quantity * current_price
