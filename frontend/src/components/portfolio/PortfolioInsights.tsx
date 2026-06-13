@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { normalizeSector } from '@/utils/sectorNormalization';
 import type { Holding } from '@/types/portfolio';
 
 interface PortfolioInsightsProps {
@@ -44,14 +45,14 @@ export function PortfolioInsights({
     if (largestPercentage > 50) {
       result.push({
         type: 'warning',
-        message: `Portfolio is heavily concentrated in ${largestHolding.company_name || largestHolding.symbol} (${largestPercentage.toFixed(1)}%). Consider diversifying to reduce risk.`,
+        message: `Consider reducing exposure to ${largestHolding.company_name || largestHolding.symbol} (${largestPercentage.toFixed(1)}%).`,
       });
     }
 
     // Check sector concentration (one sector > 60%)
     const sectorMap = new Map<string, number>();
     for (const holding of holdings) {
-      const sector = holding.sector || 'Unclassified';
+      const sector = normalizeSector(holding.sector);
       const current = sectorMap.get(sector) || 0;
       sectorMap.set(sector, current + holding.current_value);
     }
@@ -69,7 +70,7 @@ export function PortfolioInsights({
     if (maxSectorPercentage > 60) {
       result.push({
         type: 'warning',
-        message: `High sector concentration detected in ${maxSector} sector (${maxSectorPercentage.toFixed(1)}%). Consider exploring other sectors.`,
+        message: `Consider adding investments outside ${maxSector} (${maxSectorPercentage.toFixed(1)}%).`,
       });
     }
 
@@ -77,7 +78,7 @@ export function PortfolioInsights({
     if (holdings.length < 5) {
       result.push({
         type: 'info',
-        message: `You have only ${holdings.length} holdings. Consider adding more for better diversification.`,
+        message: `Adding more holdings could improve diversification.`,
       });
     } else {
       result.push({
@@ -91,7 +92,7 @@ export function PortfolioInsights({
       if (diversificationScore > 70) {
         result.push({
           type: 'success',
-          message: `Your portfolio diversification score is excellent (${diversificationScore}/100).`,
+          message: `Portfolio diversification is healthy.`,
         });
       }
     }

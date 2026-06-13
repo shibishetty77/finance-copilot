@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { formatCurrency } from '@/utils/formatDate';
+import { normalizeSector } from '@/utils/sectorNormalization';
 import type { Holding } from '@/types/portfolio';
 
 interface TopHoldingsWidgetProps {
@@ -88,7 +89,7 @@ export function TopHoldingsWidget({
                 </div>
                 <div className="flex items-center gap-2">
                   <p className="text-xs text-white/50">
-                    {holding.asset_type} {holding.sector && `• ${holding.sector}`}
+                    {holding.asset_type} {holding.sector && `• ${normalizeSector(holding.sector)}`}
                   </p>
                 </div>
               </div>

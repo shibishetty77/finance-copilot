@@ -111,19 +111,11 @@ export function PortfolioAllocationChart({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle>Portfolio Allocation</CardTitle>
-            <p className="text-xs text-white/50 mt-1">
-              Distribution by current value
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-white/50 font-medium mb-1">Total Value</p>
-            <p className="text-lg font-bold text-brand-400">
-              {formatCurrency(totalValue)}
-            </p>
-          </div>
+        <div>
+          <CardTitle>Portfolio Allocation {formatCurrency(totalValue)}</CardTitle>
+          <p className="text-xs text-white/50 mt-1">
+            Distribution by current value
+          </p>
         </div>
       </CardHeader>
 

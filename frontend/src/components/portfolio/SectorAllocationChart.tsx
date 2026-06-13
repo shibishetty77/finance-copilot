@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { formatCurrency } from '@/utils/formatDate';
+import { normalizeSector } from '@/utils/sectorNormalization';
 import type { Holding } from '@/types/portfolio';
 
 interface SectorAllocationChartProps {
@@ -63,10 +64,10 @@ export function SectorAllocationChart({
       return [];
     }
 
-    // Group by sector
+    // Group by normalized sector
     const sectorMap = new Map<string, number>();
     holdings.forEach((holding) => {
-      const sector = holding.sector || 'Unclassified';
+      const sector = normalizeSector(holding.sector);
       const current = sectorMap.get(sector) || 0;
       sectorMap.set(sector, current + holding.current_value);
     });

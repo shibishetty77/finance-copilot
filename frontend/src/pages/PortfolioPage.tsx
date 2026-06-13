@@ -27,6 +27,7 @@ import { TopHoldingsWidget } from '@/components/portfolio/TopHoldingsWidget';
 import { PortfolioInsights } from '@/components/portfolio/PortfolioInsights';
 import { portfolioApi } from '@/api/portfolio';
 import { formatCurrency } from '@/utils/formatDate';
+import { getRiskScoreColor, getScoreWidgetColor } from '@/utils/riskScore';
 import type { Holding, HoldingUpdate } from '@/types/portfolio';
 
 // ── Form schema ───────────────────────────────────────────────────────────────
@@ -84,18 +85,17 @@ function ScoreWidget({
   score,
   icon: Icon,
   recommendations,
+  isRiskScore = false,
 }: {
   title: string;
   score: number;
   icon: React.ElementType;
   recommendations: string[];
+  isRiskScore?: boolean;
 }) {
-  const getScoreColor = (s: number) => {
-    if (s >= 80) return 'bg-income/20 text-income';
-    if (s >= 60) return 'bg-brand-600/20 text-brand-400';
-    if (s >= 40) return 'bg-yellow-600/20 text-yellow-400';
-    return 'bg-expense/20 text-expense';
-  };
+  const colorClass = isRiskScore
+    ? `${getRiskScoreColor(score).bg} ${getRiskScoreColor(score).text}`
+    : getScoreWidgetColor(score);
 
   return (
     <Card>
@@ -104,7 +104,7 @@ function ScoreWidget({
         <Icon className="w-4 h-4 text-brand-400" />
       </CardHeader>
       <div className="flex items-center justify-center py-4">
-        <div className={`w-24 h-24 rounded-full flex items-center justify-center ${getScoreColor(score)}`}>
+        <div className={`w-24 h-24 rounded-full flex items-center justify-center ${colorClass}`}>
           <span className="text-3xl font-bold">{score}</span>
         </div>
       </div>
@@ -578,6 +578,7 @@ export function PortfolioPage() {
               score={risk.score}
               icon={Shield}
               recommendations={risk.recommendations}
+              isRiskScore={true}
             />
           )}
         </div>
