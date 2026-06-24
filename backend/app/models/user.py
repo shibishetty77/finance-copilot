@@ -51,7 +51,7 @@ class User(Base):
     holdings: Mapped[list["Holding"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     watchlist: Mapped[list["Watchlist"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     portfolio_snapshots: Mapped[list["PortfolioSnapshot"]] = relationship(back_populates="user", cascade="all, delete-orphan")
-    # goals: Mapped[list["Goal"]] = relationship(back_populates="user")
+    goals: Mapped[list["Goal"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email}>"

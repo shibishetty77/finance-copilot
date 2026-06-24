@@ -10,6 +10,7 @@ from typing import Any
 
 from sqlalchemy import and_, case, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.transaction import Transaction
 
@@ -20,7 +21,9 @@ class TransactionRepository:
 
     async def get_by_id(self, transaction_id: uuid.UUID, user_id: str) -> Transaction | None:
         result = await self.db.execute(
-            select(Transaction).where(
+            select(Transaction)
+            .options(selectinload(Transaction.category))
+            .where(
                 and_(Transaction.id == str(transaction_id), Transaction.user_id == user_id)
             )
         )
@@ -57,8 +60,8 @@ class TransactionRepository:
         )
         self.db.add(transaction)
         await self.db.flush()
-        await self.db.refresh(transaction)
-        return transaction
+        loaded = await self.get_by_id(uuid.UUID(str(transaction.id)), user_id)
+        return loaded if loaded is not None else transaction
 
     async def list_all(
         self,
@@ -75,7 +78,11 @@ class TransactionRepository:
     ) -> tuple[list[Transaction], int]:
         """List transactions with filtering, search, and pagination."""
         # Build base query
-        query = select(Transaction).where(Transaction.user_id == user_id)
+        query = (
+            select(Transaction)
+            .options(selectinload(Transaction.category))
+            .where(Transaction.user_id == user_id)
+        )
         count_query = select(func.count()).where(Transaction.user_id == user_id)
 
         # Apply filters

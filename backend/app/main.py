@@ -19,6 +19,7 @@ from app.config import settings
 from app.core.exceptions import AppException, app_exception_handler
 from app.core.rate_limiter import limiter
 from app.modules.auth.router import router as auth_router
+from app.modules.goals.router import router as goals_router
 from app.modules.portfolio.router import router as portfolio_router
 from app.modules.transactions.router import router as transactions_router
 
@@ -81,6 +82,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router, prefix=API_V1)
     app.include_router(transactions_router, prefix=API_V1)
     app.include_router(portfolio_router, prefix=API_V1)
+    app.include_router(goals_router, prefix=API_V1)
 
     # ── Health check ──────────────────────────────────────────────────────────
     @app.get("/health", tags=["System"], include_in_schema=False)

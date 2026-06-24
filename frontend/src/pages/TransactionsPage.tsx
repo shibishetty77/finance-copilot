@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,7 +16,11 @@ import {
   Calendar,
   Tag,
   Building2,
+  Sparkles,
+  ChevronDown,
 } from 'lucide-react';
+import { useCategoryDetector } from '@/hooks/useCategoryDetector';
+import { CATEGORIES, getCategoryById } from '@/utils/categorize';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -322,11 +326,16 @@ export function TransactionsPage() {
                     transaction.type === 'income' ? 'bg-income/20' : 'bg-expense/20'
                   }`}
                 >
-                  {transaction.category?.icon ? (
-                    <span className="text-lg">{transaction.category.icon}</span>
-                  ) : (
-                    <IndianRupee className="w-4 h-4 text-white/60" />
-                  )}
+                  {(() => {
+                    // Prefer the API-loaded category icon, then fall back to local static list emoji
+                    const localCat = getCategoryById(transaction.category_id);
+                    const icon = transaction.category?.icon || localCat?.icon;
+                    return icon ? (
+                      <span className="text-lg">{icon}</span>
+                    ) : (
+                      <IndianRupee className="w-4 h-4 text-white/60" />
+                    );
+                  })()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">
@@ -334,7 +343,10 @@ export function TransactionsPage() {
                   </p>
                   <p className="text-xs text-white/50">
                     {formatDate(transaction.transaction_date)}
-                    {transaction.category && ` • ${transaction.category.name}`}
+                    {(() => {
+                      const catName = transaction.category?.name || getCategoryById(transaction.category_id)?.name;
+                      return catName ? ` • ${catName}` : '';
+                    })()}
                   </p>
                 </div>
                 <div className="text-right">
@@ -458,6 +470,115 @@ export function TransactionsPage() {
   );
 }
 
+// ── Smart Category Selector ──────────────────────────────────────────────────
+function CategorySelector({
+  description,
+  value,
+  onChange,
+}: {
+  description: string;
+  value: number | undefined;
+  onChange: (id: number | undefined) => void;
+}) {
+  const detected = useCategoryDetector(description);
+  const [overridden, setOverridden] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  // When detected category changes and user hasn't manually overridden, auto-fill
+  useEffect(() => {
+    if (!overridden && detected) {
+      onChange(detected.id);
+    }
+  }, [detected, overridden, onChange]);
+
+  // When modal opens fresh (value is undefined and no description), reset override flag
+  useEffect(() => {
+    if (!description) {
+      setOverridden(false);
+    }
+  }, [description]);
+
+  const activeCat = getCategoryById(value);
+
+  const handleManualSelect = (id: number | undefined) => {
+    setOverridden(true);
+    onChange(id);
+    setShowDropdown(false);
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs font-medium text-white/60">Category</p>
+
+      {/* Auto-detect badge */}
+      {detected && !overridden && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-900/30 border border-brand-500/30">
+          <Sparkles className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" />
+          <span className="text-xs text-brand-300">
+            Auto-detected category:{' '}
+            <span className="font-semibold text-brand-200">{detected.icon} {detected.name}</span>
+          </span>
+        </div>
+      )}
+
+      {/* Manual override selector */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setShowDropdown((s) => !s)}
+          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface-input border border-white/10 hover:border-white/20 transition-colors text-sm text-white/80"
+        >
+          <span className="flex items-center gap-2">
+            {activeCat ? (
+              <>
+                <span>{activeCat.icon}</span>
+                <span>{activeCat.name}</span>
+              </>
+            ) : (
+              <span className="text-white/40">Select category (optional)</span>
+            )}
+          </span>
+          <ChevronDown className="w-4 h-4 text-white/40 flex-shrink-0" />
+        </button>
+
+        {showDropdown && (
+          <div className="absolute z-50 top-full mt-1 w-full bg-surface border border-white/10 rounded-xl shadow-2xl overflow-auto max-h-52 py-1">
+            <button
+              type="button"
+              onClick={() => handleManualSelect(undefined)}
+              className="w-full text-left px-3 py-2 text-sm text-white/50 hover:bg-white/5 transition-colors"
+            >
+              None
+            </button>
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => handleManualSelect(cat.id)}
+                className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-white/5 transition-colors ${
+                  value === cat.id ? 'text-brand-300' : 'text-white/80'
+                }`}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.name}</span>
+                {value === cat.id && <span className="ml-auto text-brand-400">✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Click-outside handler */}
+      {showDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowDropdown(false)}
+        />
+      )}
+    </div>
+  );
+}
+
 // ── Transaction Modal Component ─────────────────────────────────────────────────
 function TransactionModal({
   open,
@@ -476,15 +597,26 @@ function TransactionModal({
   submitLabel: string;
   isSubmitting: boolean;
 }) {
+  const descriptionValue = form.watch('description') ?? '';
+  const categoryIdValue = form.watch('category_id');
+
   return (
     <Modal open={open} onClose={onClose} title={title}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <Input
           label="Description"
-          placeholder="e.g., Grocery shopping at Walmart"
+          placeholder="e.g., Zomato dinner, Uber ride, Salary credit…"
           error={form.formState.errors.description?.message}
           {...form.register('description')}
         />
+
+        {/* Smart Category Selector — shown below description */}
+        <CategorySelector
+          description={descriptionValue}
+          value={categoryIdValue}
+          onChange={(id) => form.setValue('category_id', id)}
+        />
+
         <div className="grid grid-cols-2 gap-4">
           <Input
             label="Amount"
@@ -515,7 +647,7 @@ function TransactionModal({
         />
         <Input
           label="Merchant"
-          placeholder="e.g., Walmart"
+          placeholder="e.g., Zomato"
           leftIcon={<Building2 className="w-4 h-4" />}
           error={form.formState.errors.merchant_name?.message}
           {...form.register('merchant_name')}
@@ -533,7 +665,7 @@ function TransactionModal({
         />
         <Input
           label="Notes"
-          placeholder="Additional notes..."
+          placeholder="Additional notes…"
           {...form.register('notes')}
         />
         {form.formState.errors.root && (
