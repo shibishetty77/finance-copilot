@@ -11,6 +11,11 @@ build/
 .venv/
 venv/
 env/
+.env
+*.env
+backend/.env
+frontend/.env
+*.db
 
 # Environment variables
 .env
