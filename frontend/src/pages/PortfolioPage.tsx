@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
-import { Badge } from '@/components/ui/Badge';
 import { PortfolioAllocationChart } from '@/components/portfolio/PortfolioAllocationChart';
 import { SectorAllocationChart } from '@/components/portfolio/SectorAllocationChart';
 import { TopHoldingsWidget } from '@/components/portfolio/TopHoldingsWidget';
@@ -61,17 +60,17 @@ function SummaryCard({
   trend?: number;
 }) {
   return (
-    <Card className="flex-1 min-w-0">
+    <Card className="fc-stat-card">
       <CardHeader>
-        <p className="text-xs text-white/50 font-medium">{label}</p>
-        <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center`}>
-          <Icon className="w-4 h-4 text-white" />
+        <p className="fc-label">{label}</p>
+        <div className={`fc-stat-icon ${color}`}>
+          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
         </div>
       </CardHeader>
-      <div className="text-2xl font-bold text-white tabular-nums">{value}</div>
+      <div className="fc-stat-value">{value}</div>
       {trend !== undefined && (
-        <div className={`flex items-center gap-1 mt-1 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
-          {trend >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+        <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
+          {trend >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
           {Math.abs(trend).toFixed(2)}%
         </div>
       )}
@@ -310,7 +309,7 @@ export function PortfolioPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="fc-heading">Portfolio</h1>
-          <p className="fc-subheading mt-0.5">Track your investments</p>
+          <p className="fc-subheading">Track your investments</p>
         </div>
         <Button
           leftIcon={<Plus className="w-4 h-4" />}
@@ -323,8 +322,8 @@ export function PortfolioPage() {
       {/* Empty State */}
       {!hasHoldings && (
         <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-          <div className="mb-4 p-4 rounded-2xl bg-brand-600/10 border border-brand-500/20 text-brand-400">
-            <Wallet className="w-12 h-12" />
+          <div className="mb-4 p-4 rounded-2xl bg-brand-600/10 border border-brand-500/20 text-brand-400 animate-fade-in">
+            <Wallet className="w-12 h-12" strokeWidth={2} />
           </div>
           <h3 className="text-base font-semibold text-white mb-2">No holdings yet</h3>
           <p className="text-sm text-white/50 max-w-sm leading-relaxed">
@@ -342,7 +341,7 @@ export function PortfolioPage() {
       {hasHoldings && (
         <>
           {/* Summary Cards */}
-          <div className="flex gap-4 overflow-x-auto pb-1 no-scrollbar">
+          <div className="fc-stat-grid">
         <SummaryCard
           label="Portfolio Value"
           value={summary ? formatCurrency(summary.total_portfolio_value) : '₹0'}
@@ -408,7 +407,7 @@ export function PortfolioPage() {
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Holdings Table */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 fc-card">
           <CardHeader>
             <CardTitle>Holdings</CardTitle>
           </CardHeader>
@@ -456,10 +455,10 @@ export function PortfolioPage() {
                 holdingsData?.items.map((holding) => (
                   <div
                     key={holding.id}
-                    className="p-4 rounded-xl border border-white/10 hover:border-white/20 hover:bg-surface-hover transition-all"
+                    className="fc-card-interactive p-4"
                   >
                     {/* Header Row: Symbol, Company */}
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0 pr-4">
                         <p className="text-sm font-semibold text-white">{holding.symbol}</p>
                         <p className="text-xs text-white/50 mt-0.5">
@@ -470,33 +469,33 @@ export function PortfolioPage() {
 
                     {/* Asset Type and Sector Row */}
                     <div className="flex items-center gap-2 mb-3">
-                      <Badge variant="brand" className="text-xs">
+                      <span className="fc-badge fc-badge-brand">
                         {holding.asset_type.charAt(0).toUpperCase() + holding.asset_type.slice(1).replace('_', ' ')}
-                      </Badge>
+                      </span>
                       {holding.sector && (
-                        <Badge variant="default" className="text-xs">
+                        <span className="fc-badge fc-badge-neutral">
                           {holding.sector}
-                        </Badge>
+                        </span>
                       )}
                     </div>
 
                     {/* Details Grid */}
-                    <div className="grid grid-cols-4 gap-4 mb-3 pb-3 border-b border-white/5">
+                    <div className="grid grid-cols-4 gap-4 mb-3 pb-3 border-b border-surface-border">
                       <div>
-                        <p className="text-xs text-white/50 font-medium mb-1">Quantity</p>
-                        <p className="text-sm font-semibold text-white">{holding.quantity.toLocaleString('en-IN')}</p>
+                        <p className="fc-label">Quantity</p>
+                        <p className="text-sm font-semibold text-white tabular-nums">{holding.quantity.toLocaleString('en-IN')}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-white/50 font-medium mb-1">Avg Buy Price</p>
-                        <p className="text-sm font-semibold text-white">{formatCurrency(holding.average_buy_price)}</p>
+                        <p className="fc-label">Avg Buy Price</p>
+                        <p className="text-sm font-semibold text-white tabular-nums">{formatCurrency(holding.average_buy_price)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-white/50 font-medium mb-1">Current Price</p>
-                        <p className="text-sm font-semibold text-white">{formatCurrency(holding.current_price)}</p>
+                        <p className="fc-label">Current Price</p>
+                        <p className="text-sm font-semibold text-white tabular-nums">{formatCurrency(holding.current_price)}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-white/50 font-medium mb-1">Current Value</p>
-                        <p className="text-sm font-semibold text-white">{formatCurrency(holding.current_value)}</p>
+                        <p className="fc-label">Current Value</p>
+                        <p className="text-sm font-semibold text-white tabular-nums">{formatCurrency(holding.current_value)}</p>
                       </div>
                     </div>
 
@@ -504,7 +503,7 @@ export function PortfolioPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <p
-                          className={`text-sm font-semibold ${
+                          className={`text-sm font-semibold tabular-nums ${
                             holding.gain_loss >= 0 ? 'text-income' : 'text-expense'
                           }`}
                         >
@@ -515,19 +514,21 @@ export function PortfolioPage() {
                           </span>
                         </p>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          leftIcon={<Edit2 className="w-3 h-3" />}
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button
+                          className="fc-icon-btn"
                           onClick={() => openEditModal(holding)}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          leftIcon={<Trash2 className="w-3 h-3" />}
+                          aria-label="Edit holding"
+                        >
+                          <Edit2 className="w-4 h-4" strokeWidth={2} />
+                        </button>
+                        <button
+                          className="fc-icon-btn text-expense/60 hover:text-expense"
                           onClick={() => openDeleteModal(holding)}
-                        />
+                          aria-label="Delete holding"
+                        >
+                          <Trash2 className="w-4 h-4" strokeWidth={2} />
+                        </button>
                       </div>
                     </div>
                   </div>

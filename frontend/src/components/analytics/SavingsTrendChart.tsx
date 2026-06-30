@@ -12,10 +12,10 @@ interface SavingsTrendChartProps {
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-surface border border-white/10 rounded-lg p-3 shadow-lg">
-        <p className="text-xs font-medium text-white/50 mb-1">{label}</p>
+      <div className="bg-surface-card border border-surface-border rounded-xl p-4 shadow-card-lg">
+        <p className="text-xs font-medium text-white/50 mb-2">{label}</p>
         <p className="text-sm font-semibold text-brand-400">
-          Savings: {formatCurrency(payload[0].value as number)}
+          Savings: <span className="text-white">{formatCurrency(payload[0].value as number)}</span>
         </p>
       </div>
     );
@@ -39,14 +39,14 @@ export function SavingsTrendChart({ data }: SavingsTrendChartProps) {
   const hasEnoughData = chartData.length >= 2;
 
   return (
-    <Card className="h-full min-h-[350px] flex flex-col">
+    <Card className="fc-card h-full min-h-[350px] flex flex-col">
       <CardHeader>
         <CardTitle>Monthly Savings Trend</CardTitle>
       </CardHeader>
       <div className="flex-1 mt-4 px-4 pb-4">
         {!hasEnoughData ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/10 rounded-xl bg-white/5">
-            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-surface-border rounded-xl bg-white/5">
+            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 shadow-glow">
               <TrendingUp className="w-6 h-6 text-white/40" />
             </div>
             <p className="text-sm font-medium text-white/70">Not enough data yet</p>

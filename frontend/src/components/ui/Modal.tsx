@@ -48,7 +48,7 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
       {/* Panel */}
       <div
         className={cn(
-          'relative w-full bg-surface-card border border-surface-border rounded-2xl shadow-card-lg animate-slide-up flex flex-col',
+          'relative w-full bg-surface-card border border-surface-border rounded-2xl shadow-card-lg animate-scale-in flex flex-col',
           sizes[size],
           'max-h-[90vh]',
           className,

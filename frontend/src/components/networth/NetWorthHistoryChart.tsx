@@ -12,8 +12,8 @@ interface NetWorthHistoryChartProps {
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-surface border border-white/10 rounded-lg p-3 shadow-lg">
-        <p className="text-xs font-medium text-white/50 mb-1">{label}</p>
+      <div className="bg-surface-card border border-surface-border rounded-xl p-4 shadow-card-lg">
+        <p className="text-xs font-medium text-white/50 mb-2">{label}</p>
         <p className="text-sm font-semibold text-brand-400">
           {formatCurrency(payload[0].value as number)}
         </p>
@@ -47,7 +47,7 @@ export function NetWorthHistoryChart({ monthlySummaries }: NetWorthHistoryChartP
 
   if (!chartData || chartData.length === 0) {
     return (
-      <Card className="h-full flex flex-col min-h-[350px]">
+      <Card className="fc-card h-full flex flex-col min-h-[350px]">
         <CardHeader>
           <CardTitle>Savings Growth Trend</CardTitle>
           <p className="text-xs text-white/40 mt-1">Based on historical savings data.</p>
@@ -62,13 +62,13 @@ export function NetWorthHistoryChart({ monthlySummaries }: NetWorthHistoryChartP
   const hasEnoughData = chartData.length >= 2;
 
   return (
-    <Card className="h-full">
+    <Card className="fc-card h-full">
       <CardHeader>
         <CardTitle>Savings Growth Trend</CardTitle>
       </CardHeader>
       <div className="h-[300px] mt-4 px-4 pb-4">
         {!hasEnoughData ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/10 rounded-xl bg-white/5">
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-surface-border rounded-xl bg-white/5">
             <p className="text-sm font-medium text-white/70">More monthly transaction data is needed to display trends.</p>
             <p className="text-xs text-white/40 mt-1">Add transactions across multiple months to see your growth.</p>
           </div>

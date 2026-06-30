@@ -23,9 +23,11 @@ function CustomTooltip({ active, payload }: any) {
   if (active && payload && payload.length) {
     const { name, value, color } = payload[0].payload;
     return (
-      <div className="bg-surface border border-white/10 rounded-lg p-3 shadow-lg">
-        <p className="text-sm font-semibold" style={{ color }}>{name}</p>
-        <p className="text-xs text-white/70 mt-1">Amount: {formatCurrency(value)}</p>
+      <div className="bg-surface-card border border-surface-border rounded-xl p-4 shadow-card-lg">
+        <p className="text-sm font-semibold text-white mb-2" style={{ color }}>{name}</p>
+        <p className="text-xs text-white/60">
+          Amount: <span className="text-white font-medium">{formatCurrency(value)}</span>
+        </p>
       </div>
     );
   }
@@ -36,16 +38,11 @@ export function ExpenseCategoryChart({ transactions }: ExpenseCategoryChartProps
   const chartData = useMemo(() => {
     if (!transactions) return [];
 
-    // Diagnostic: log the first 5 transactions to verify category shape
-    console.log('Transaction sample', transactions.slice(0, 5));
-
     const categoryMap: Record<string, number> = {};
     let totalExpenses = 0;
 
     transactions.forEach(t => {
       if (t.type === 'expense') {
-        // The backend eagerly loads the category relationship.
-        // The correct field is t.category.name (CategoryResponse | null).
         const categoryName =
           t.category?.name ??
           (t.category_id !== null ? `Category ${t.category_id}` : 'Uncategorized');
@@ -71,13 +68,13 @@ export function ExpenseCategoryChart({ transactions }: ExpenseCategoryChartProps
   const topCategories = chartData.slice(0, 5);
 
   return (
-    <Card className="h-full min-h-[350px] flex flex-col">
+    <Card className="fc-card h-full min-h-[350px] flex flex-col">
       <CardHeader>
         <CardTitle>Top Spending Categories</CardTitle>
       </CardHeader>
       <div className="flex-1 mt-4 px-4 pb-4">
         {!hasData ? (
-          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-white/10 rounded-xl bg-white/5">
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-surface-border rounded-xl bg-white/5">
             <p className="text-sm font-medium text-white/70">No expenses recorded.</p>
           </div>
         ) : (
@@ -91,10 +88,11 @@ export function ExpenseCategoryChart({ transactions }: ExpenseCategoryChartProps
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
-                    outerRadius={80}
+                    outerRadius={90}
                     paddingAngle={2}
                     dataKey="value"
-                    stroke="none"
+                    strokeWidth={2}
+                    stroke="#161627"
                   >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -110,7 +108,7 @@ export function ExpenseCategoryChart({ transactions }: ExpenseCategoryChartProps
               {topCategories.map((cat, idx) => (
                 <div key={idx} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 font-semibold text-xs text-white/50">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-white/5 font-semibold text-xs text-white/50 shadow-lg">
                       #{idx + 1}
                     </div>
                     <div>
@@ -124,7 +122,7 @@ export function ExpenseCategoryChart({ transactions }: ExpenseCategoryChartProps
                 </div>
               ))}
               {chartData.length > 5 && (
-                <p className="text-xs text-white/40 pt-2 text-center border-t border-white/5">
+                <p className="text-xs text-white/40 pt-2 text-center border-t border-surface-border">
                   + {chartData.length - 5} more categories
                 </p>
               )}

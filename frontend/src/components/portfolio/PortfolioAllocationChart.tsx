@@ -37,12 +37,12 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload as AllocationData;
     return (
-      <div className="bg-surface border border-white/10 rounded-lg p-3 shadow-lg">
-        <p className="text-sm font-semibold text-white">{data.symbol}</p>
-        <p className="text-xs text-white/70 mt-1">
-          Value: {formatCurrency(data.value)}
+      <div className="bg-surface-card border border-surface-border rounded-xl p-4 shadow-card-lg">
+        <p className="text-sm font-semibold text-white mb-2">{data.symbol}</p>
+        <p className="text-xs text-white/60 mb-1">
+          Value: <span className="text-white font-medium">{formatCurrency(data.value)}</span>
         </p>
-        <p className="text-xs text-brand-400 font-medium mt-1">
+        <p className="text-sm text-brand-400 font-semibold">
           {data.percentage.toFixed(2)}%
         </p>
       </div>
@@ -78,7 +78,7 @@ export function PortfolioAllocationChart({
   // Loading state
   if (isLoading) {
     return (
-      <Card>
+      <Card className="fc-card">
         <CardHeader>
           <CardTitle>Portfolio Allocation</CardTitle>
         </CardHeader>
@@ -95,7 +95,7 @@ export function PortfolioAllocationChart({
   // Empty state
   if (!holdings || holdings.length === 0 || totalValue === 0) {
     return (
-      <Card>
+      <Card className="fc-card">
         <CardHeader>
           <CardTitle>Portfolio Allocation</CardTitle>
         </CardHeader>
@@ -109,7 +109,7 @@ export function PortfolioAllocationChart({
   }
 
   return (
-    <Card>
+    <Card className="fc-card">
       <CardHeader>
         <div>
           <CardTitle>Portfolio Allocation {formatCurrency(totalValue)}</CardTitle>
@@ -127,10 +127,12 @@ export function PortfolioAllocationChart({
               data={allocationData}
               cx="50%"
               cy="50%"
-              outerRadius={80}
-              innerRadius={50}
+              outerRadius={90}
+              innerRadius={55}
               fill="#8884d8"
               dataKey="value"
+              strokeWidth={2}
+              stroke="#161627"
             >
               {allocationData.map((_, index) => (
                 <Cell
@@ -145,7 +147,11 @@ export function PortfolioAllocationChart({
               height={36}
               formatter={(_, entry) => {
                 const data = entry.payload as unknown as AllocationData;
-                return `${data.symbol} (${data.percentage.toFixed(1)}%)`;
+                return (
+                  <span className="text-xs text-white/70">
+                    {data.symbol} <span className="text-white font-medium">({data.percentage.toFixed(1)}%)</span>
+                  </span>
+                );
               }}
               wrapperStyle={{
                 paddingTop: '16px',
@@ -164,16 +170,16 @@ export function PortfolioAllocationChart({
               <div key={item.symbol} className="flex items-center justify-between py-2 px-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    className="w-3 h-3 rounded-full flex-shrink-0 shadow-lg"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
                   <p className="text-sm font-medium text-white">{item.symbol}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-white tabular-nums">
                     {item.percentage.toFixed(2)}%
                   </p>
-                  <p className="text-xs text-white/50">
+                  <p className="text-xs text-white/50 tabular-nums">
                     {formatCurrency(item.value)}
                   </p>
                 </div>

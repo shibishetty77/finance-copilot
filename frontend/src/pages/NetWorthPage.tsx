@@ -35,20 +35,20 @@ function SummaryCard({
   helperText?: string;
 }) {
   return (
-    <Card className="flex-1 min-w-0">
+    <Card className="fc-stat-card">
       <CardHeader>
-        <p className="text-xs text-white/50 font-medium">{label}</p>
-        <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center`}>
-          <Icon className="w-4 h-4 text-white" />
+        <p className="fc-label">{label}</p>
+        <div className={`fc-stat-icon ${color}`}>
+          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
         </div>
       </CardHeader>
-      <div className="text-2xl font-bold text-white tabular-nums">{value}</div>
+      <div className="fc-stat-value">{value}</div>
       {helperText && (
-        <p className="text-xs text-white/40 mt-1">{helperText}</p>
+        <p className="text-xs text-white/40 mt-2">{helperText}</p>
       )}
       {trend !== undefined && (
-        <div className={`flex items-center gap-1 mt-1 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
-          {trend >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+        <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
+          {trend >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
           {Math.abs(trend).toFixed(2)}% vs last month
         </div>
       )}
@@ -117,12 +117,12 @@ export function NetWorthPage() {
       <div className="space-y-6 animate-fade-in">
         <div>
           <h1 className="fc-heading">Net Worth</h1>
-          <p className="fc-subheading mt-0.5">{currentMonthYear()} overview</p>
+          <p className="fc-subheading">{currentMonthYear()} overview</p>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-1 no-scrollbar">
+        <div className="fc-stat-grid">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="flex-1 min-w-0">
-              <CardHeader><Skeleton className="w-8 h-8 rounded-xl" /></CardHeader>
+            <Card key={i} className="fc-card flex-1 min-w-0">
+              <CardHeader><Skeleton className="w-10 h-10 rounded-xl" /></CardHeader>
               <Skeleton className="h-8 w-24" />
             </Card>
           ))}
@@ -139,7 +139,7 @@ export function NetWorthPage() {
       <div className="space-y-6 animate-fade-in">
         <div>
           <h1 className="fc-heading">Net Worth</h1>
-          <p className="fc-subheading mt-0.5">{currentMonthYear()} overview</p>
+          <p className="fc-subheading">{currentMonthYear()} overview</p>
         </div>
         <EmptyState
           icon={<IndianRupee className="w-12 h-12" />}
@@ -165,11 +165,11 @@ export function NetWorthPage() {
       {/* Header */}
       <div>
         <h1 className="fc-heading">Net Worth</h1>
-        <p className="fc-subheading mt-0.5">{currentMonthYear()} overview</p>
+        <p className="fc-subheading">{currentMonthYear()} overview</p>
       </div>
 
       {/* Row 1: Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="fc-stat-grid">
         <SummaryCard
           label="Net Worth"
           value={formatCurrency(netWorth)}

@@ -26,11 +26,11 @@ export function Card({
     <div
       className={cn(
         variant === 'default' && 'fc-card',
-        variant === 'glass' && 'fc-glass p-6',
+        variant === 'glass' && 'fc-glass p-6 shadow-card',
         variant === 'gradient' &&
-          'bg-gradient-to-br from-brand-900/40 to-surface-card border border-brand-700/30 rounded-2xl p-6',
+          'bg-gradient-to-br from-brand-900/40 to-surface-card border border-brand-700/30 rounded-2xl p-6 shadow-card',
         variant !== 'glass' && variant !== 'gradient' && paddingClasses[padding],
-        hover && 'hover:border-brand-500/50 hover:shadow-glow transition-all duration-200 cursor-pointer',
+        hover && 'hover:-translate-y-0.5 hover:border-brand-500/30 hover:shadow-card-lg cursor-default',
         className,
       )}
       {...props}
@@ -46,7 +46,7 @@ export function CardHeader({
   ...props
 }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn('flex items-center justify-between mb-4', className)} {...props}>
+    <div className={cn('flex items-center justify-between mb-4 gap-3', className)} {...props}>
       {children}
     </div>
   );
@@ -58,7 +58,7 @@ export function CardTitle({
   ...props
 }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn('text-base font-semibold text-white', className)} {...props}>
+    <h3 className={cn('text-base font-semibold text-white tracking-tight', className)} {...props}>
       {children}
     </h3>
   );

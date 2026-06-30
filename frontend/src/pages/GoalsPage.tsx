@@ -27,14 +27,14 @@ function SummaryCard({
   color: string;
 }) {
   return (
-    <Card className="flex-1 min-w-0">
+    <Card className="fc-stat-card">
       <CardHeader>
-        <p className="text-xs text-white/50 font-medium">{label}</p>
-        <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center`}>
-          <Icon className="w-4 h-4 text-white" />
+        <p className="fc-label">{label}</p>
+        <div className={`fc-stat-icon ${color}`}>
+          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
         </div>
       </CardHeader>
-      <div className="text-2xl font-bold text-white tabular-nums">{value}</div>
+      <div className="fc-stat-value">{value}</div>
     </Card>
   );
 }
@@ -69,13 +69,13 @@ export function GoalsPage() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <h1 className="fc-heading">Goals</h1>
-            <p className="fc-subheading mt-0.5">Track progress toward your financial goals</p>
+            <p className="fc-subheading">Track progress toward your financial goals</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="fc-stat-grid">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Card key={i} className="flex-1 min-w-0">
-              <CardHeader><Skeleton className="w-8 h-8 rounded-xl" /></CardHeader>
+            <Card key={i} className="fc-card flex-1 min-w-0">
+              <CardHeader><Skeleton className="w-10 h-10 rounded-xl" /></CardHeader>
               <Skeleton className="h-8 w-24" />
             </Card>
           ))}
@@ -95,7 +95,7 @@ export function GoalsPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="fc-heading">Goals</h1>
-          <p className="fc-subheading mt-0.5">Track progress toward your financial goals</p>
+          <p className="fc-subheading">Track progress toward your financial goals</p>
         </div>
         <Button leftIcon={<Plus className="w-4 h-4" />} onClick={() => setIsCreateOpen(true)}>
           Create Goal
@@ -103,7 +103,7 @@ export function GoalsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="fc-stat-grid">
         <SummaryCard
           label="Total Goals"
           value={stats.totalGoals.toString()}

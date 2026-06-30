@@ -26,17 +26,17 @@ function StatCard({
   color: string;
 }) {
   return (
-    <Card className="flex-1 min-w-0">
+    <Card className="fc-stat-card">
       <CardHeader>
-        <p className="text-xs text-white/50 font-medium">{label}</p>
-        <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center`}>
-          <Icon className="w-4 h-4 text-white" />
+        <p className="fc-label">{label}</p>
+        <div className={`fc-stat-icon ${color}`}>
+          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
         </div>
       </CardHeader>
-      <div className="text-2xl font-bold text-white tabular-nums">{value}</div>
+      <div className="fc-stat-value">{value}</div>
       {trend !== undefined && (
-        <div className={`flex items-center gap-1 mt-1 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
-          {trend >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+        <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
+          {trend >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
           {Math.abs(trend).toFixed(2)}% vs last month
         </div>
       )}
@@ -87,14 +87,14 @@ export function DashboardPage() {
             <h1 className="fc-heading">
               Good {getGreeting()}, {user?.full_name.split(' ')[0]} 👋
             </h1>
-            <p className="fc-subheading mt-0.5">{currentMonthYear()} overview</p>
+            <p className="fc-subheading">{currentMonthYear()} overview</p>
           </div>
         </div>
-        <div className="flex gap-4 overflow-x-auto pb-1 no-scrollbar">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="flex-1 min-w-0">
+        <div className="fc-stat-grid">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i} className="fc-card flex-1 min-w-0">
               <CardHeader>
-                <Skeleton className="w-8 h-8 rounded-xl" />
+                <Skeleton className="w-10 h-10 rounded-xl" />
               </CardHeader>
               <Skeleton className="h-8 w-24" />
             </Card>
@@ -113,7 +113,7 @@ export function DashboardPage() {
             <h1 className="fc-heading">
               Good {getGreeting()}, {user?.full_name.split(' ')[0]} 👋
             </h1>
-            <p className="fc-subheading mt-0.5">{currentMonthYear()} overview</p>
+            <p className="fc-subheading">{currentMonthYear()} overview</p>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-600/15 border border-brand-500/30">
             <Sparkles className="w-3.5 h-3.5 text-brand-400" />
@@ -144,7 +144,7 @@ export function DashboardPage() {
           <h1 className="fc-heading">
             Good {getGreeting()}, {user?.full_name.split(' ')[0]} 👋
           </h1>
-          <p className="fc-subheading mt-0.5">{currentMonthYear()} overview</p>
+          <p className="fc-subheading">{currentMonthYear()} overview</p>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-600/15 border border-brand-500/30">
           <Sparkles className="w-3.5 h-3.5 text-brand-400" />
@@ -153,7 +153,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="flex gap-4 overflow-x-auto pb-1 no-scrollbar">
+      <div className="fc-stat-grid">
         <StatCard
           label="Total Income"
           value={formatCurrency(currentMonthData.income)}
@@ -192,7 +192,7 @@ export function DashboardPage() {
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent transactions */}
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 fc-card">
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
             <span className="text-xs text-white/40">View all in Transactions page</span>
@@ -202,17 +202,17 @@ export function DashboardPage() {
               recentTransactionsData.items.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-hover transition-colors"
+                  className="fc-list-row"
                 >
                   <div
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                       transaction.type === 'income' ? 'bg-income/20' : 'bg-expense/20'
                     }`}
                   >
                     {transaction.category?.icon ? (
                       <span className="text-lg">{transaction.category.icon}</span>
                     ) : (
-                      <IndianRupee className="w-4 h-4 text-white/60" />
+                      <IndianRupee className="w-5 h-5 text-white/60" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -226,7 +226,7 @@ export function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <p
-                      className={`text-sm font-semibold ${
+                      className={`text-sm font-semibold tabular-nums ${
                         transaction.type === 'income' ? 'text-income' : 'text-expense'
                       }`}
                     >
@@ -243,14 +243,14 @@ export function DashboardPage() {
         </Card>
 
         {/* AI Health Score placeholder */}
-        <Card variant="gradient">
+        <Card className="fc-card">
           <CardHeader>
             <CardTitle>Financial Health</CardTitle>
             <Sparkles className="w-4 h-4 text-brand-400" />
           </CardHeader>
           <div className="flex items-center justify-center py-8">
             <div className="relative">
-              <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
+              <svg className="w-32 h-32 -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(99,102,241,0.15)" strokeWidth="10" />
                 <circle
                   cx="50" cy="50" r="40" fill="none"

@@ -22,9 +22,11 @@ export function AssetLiabilityChart({ totalAssets, totalLiabilities }: AssetLiab
     if (active && payload && payload.length) {
       const { name, value, color } = payload[0].payload;
       return (
-        <div className="bg-surface border border-white/10 rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-semibold" style={{ color }}>{name}</p>
-          <p className="text-xs text-white/70 mt-1">Value: {formatCurrency(value)}</p>
+        <div className="bg-surface-card border border-surface-border rounded-xl p-4 shadow-card-lg">
+          <p className="text-sm font-semibold text-white mb-2" style={{ color }}>{name}</p>
+          <p className="text-xs text-white/60">
+            Value: <span className="text-white font-medium">{formatCurrency(value)}</span>
+          </p>
         </div>
       );
     }
@@ -46,7 +48,7 @@ export function AssetLiabilityChart({ totalAssets, totalLiabilities }: AssetLiab
       : data;
 
   return (
-    <Card className="h-full flex flex-col min-h-[350px]">
+    <Card className="fc-card h-full flex flex-col min-h-[350px]">
       <CardHeader>
         <CardTitle>Asset vs Liability</CardTitle>
         <p className="text-xs text-white/40 mt-1">Debt tracking will be available in a future release.</p>
@@ -65,10 +67,11 @@ export function AssetLiabilityChart({ totalAssets, totalLiabilities }: AssetLiab
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
-                  outerRadius={80}
+                  outerRadius={85}
                   paddingAngle={5}
                   dataKey="value"
-                  stroke="none"
+                  strokeWidth={2}
+                  stroke="#161627"
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -85,11 +88,11 @@ export function AssetLiabilityChart({ totalAssets, totalLiabilities }: AssetLiab
             <div className="mt-2 space-y-1">
               <div className="flex justify-between text-sm">
                 <span className="text-white/70">Assets:</span>
-                <span className="font-medium text-white">{formatCurrency(totalAssets)}</span>
+                <span className="font-medium text-white tabular-nums">{formatCurrency(totalAssets)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-white/70">Liabilities:</span>
-                <span className="font-medium text-white">{formatCurrency(totalLiabilities)}</span>
+                <span className="font-medium text-white tabular-nums">{formatCurrency(totalLiabilities)}</span>
               </div>
             </div>
           </div>

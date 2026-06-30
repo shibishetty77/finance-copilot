@@ -61,17 +61,17 @@ function SummaryCard({
   color: string;
 }) {
   return (
-    <Card className="flex-1 min-w-0">
+    <Card className="fc-stat-card">
       <CardHeader>
-        <p className="text-xs text-white/50 font-medium">{label}</p>
-        <div className={`w-8 h-8 rounded-xl ${color} flex items-center justify-center`}>
-          <Icon className="w-4 h-4 text-white" />
+        <p className="fc-label">{label}</p>
+        <div className={`fc-stat-icon ${color}`}>
+          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
         </div>
       </CardHeader>
-      <div className="text-2xl font-bold text-white tabular-nums">{value}</div>
+      <div className="fc-stat-value">{value}</div>
       {trend !== undefined && (
-        <div className={`flex items-center gap-1 mt-1 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
-          {trend >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+        <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
+          {trend >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
           {Math.abs(trend).toFixed(2)}% vs last month
         </div>
       )}
@@ -218,7 +218,7 @@ export function TransactionsPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="fc-heading">Transactions</h1>
-          <p className="fc-subheading mt-0.5">Track your income and expenses</p>
+          <p className="fc-subheading">Track your income and expenses</p>
         </div>
         <Button
           leftIcon={<Plus className="w-4 h-4" />}
@@ -229,7 +229,7 @@ export function TransactionsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="flex gap-4 overflow-x-auto pb-1 no-scrollbar">
+      <div className="fc-stat-grid">
         <SummaryCard
           label="Total Income"
           value={formatCurrency(currentMonthData.income)}
@@ -257,10 +257,10 @@ export function TransactionsPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card className="fc-card">
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <Filter className="w-4 h-4 text-white/40" />
+          <Filter className="w-4 h-4 text-white/40" strokeWidth={2} />
         </CardHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Input
@@ -294,7 +294,7 @@ export function TransactionsPage() {
       </Card>
 
       {/* Transactions Table */}
-      <Card>
+      <Card className="fc-card">
         <CardHeader>
           <CardTitle>Transactions</CardTitle>
           <span className="text-xs text-white/40">
@@ -304,13 +304,13 @@ export function TransactionsPage() {
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-surface-input animate-pulse" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3.5 w-32 bg-surface-input animate-pulse rounded" />
-                  <div className="h-3 w-20 bg-surface-input animate-pulse rounded" />
+              <div key={i} className="flex items-center gap-4 p-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-input animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-32 bg-surface-input animate-pulse rounded" />
+                  <div className="h-3 w-24 bg-surface-input animate-pulse rounded" />
                 </div>
-                <div className="h-4 w-16 bg-surface-input animate-pulse rounded" />
+                <div className="h-5 w-20 bg-surface-input animate-pulse rounded" />
               </div>
             ))}
           </div>
@@ -319,10 +319,10 @@ export function TransactionsPage() {
             {transactionsData.items.map((transaction) => (
               <div
                 key={transaction.id}
-                className="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-hover transition-colors"
+                className="fc-list-row"
               >
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110 ${
                     transaction.type === 'income' ? 'bg-income/20' : 'bg-expense/20'
                   }`}
                 >
@@ -333,7 +333,7 @@ export function TransactionsPage() {
                     return icon ? (
                       <span className="text-lg">{icon}</span>
                     ) : (
-                      <IndianRupee className="w-4 h-4 text-white/60" />
+                      <IndianRupee className="w-5 h-5 text-white/60" strokeWidth={2} />
                     );
                   })()}
                 </div>
@@ -351,7 +351,7 @@ export function TransactionsPage() {
                 </div>
                 <div className="text-right">
                   <p
-                    className={`text-sm font-semibold ${
+                    className={`text-sm font-semibold tabular-nums ${
                       transaction.type === 'income' ? 'text-income' : 'text-expense'
                     }`}
                   >
@@ -359,21 +359,21 @@ export function TransactionsPage() {
                     {formatCurrency(transaction.amount)}
                   </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <button
+                    className="fc-icon-btn"
                     onClick={() => openEditModal(transaction)}
+                    aria-label="Edit transaction"
                   >
-                    <Edit2 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                    <Edit2 className="w-4 h-4" strokeWidth={2} />
+                  </button>
+                  <button
+                    className="fc-icon-btn text-expense/60 hover:text-expense"
                     onClick={() => openDeleteModal(transaction)}
+                    aria-label="Delete transaction"
                   >
-                    <Trash2 className="w-4 h-4 text-expense" />
-                  </Button>
+                    <Trash2 className="w-4 h-4" strokeWidth={2} />
+                  </button>
                 </div>
               </div>
             ))}
@@ -512,8 +512,8 @@ function CategorySelector({
 
       {/* Auto-detect badge */}
       {detected && !overridden && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-900/30 border border-brand-500/30">
-          <Sparkles className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-900/30 border border-brand-500/30 animate-fade-in">
+          <Sparkles className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" strokeWidth={2} />
           <span className="text-xs text-brand-300">
             Auto-detected category:{' '}
             <span className="font-semibold text-brand-200">{detected.icon} {detected.name}</span>
@@ -526,7 +526,7 @@ function CategorySelector({
         <button
           type="button"
           onClick={() => setShowDropdown((s) => !s)}
-          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface-input border border-white/10 hover:border-white/20 transition-colors text-sm text-white/80"
+          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface-input border border-white/10 hover:border-white/20 transition-colors duration-200 ease-out text-sm text-white/80"
         >
           <span className="flex items-center gap-2">
             {activeCat ? (
@@ -538,15 +538,15 @@ function CategorySelector({
               <span className="text-white/40">Select category (optional)</span>
             )}
           </span>
-          <ChevronDown className="w-4 h-4 text-white/40 flex-shrink-0" />
+          <ChevronDown className="w-4 h-4 text-white/40 flex-shrink-0 transition-transform duration-200" strokeWidth={2} />
         </button>
 
         {showDropdown && (
-          <div className="absolute z-50 top-full mt-1 w-full bg-surface border border-white/10 rounded-xl shadow-2xl overflow-auto max-h-52 py-1">
+          <div className="absolute z-50 top-full mt-1 w-full bg-surface border border-white/10 rounded-xl shadow-2xl overflow-auto max-h-52 py-1 animate-scale-in">
             <button
               type="button"
               onClick={() => handleManualSelect(undefined)}
-              className="w-full text-left px-3 py-2 text-sm text-white/50 hover:bg-white/5 transition-colors"
+              className="w-full text-left px-3 py-2 text-sm text-white/50 hover:bg-white/5 transition-colors duration-150 ease-out"
             >
               None
             </button>
@@ -555,7 +555,7 @@ function CategorySelector({
                 key={cat.id}
                 type="button"
                 onClick={() => handleManualSelect(cat.id)}
-                className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-white/5 transition-colors ${
+                className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-white/5 transition-colors duration-150 ease-out ${
                   value === cat.id ? 'text-brand-300' : 'text-white/80'
                 }`}
               >

@@ -27,6 +27,7 @@ import { TransactionsPage } from '@/pages/TransactionsPage';
 import { NetWorthPage }     from '@/pages/NetWorthPage';
 import { AnalyticsPage }    from '@/pages/AnalyticsPage';
 import { GoalsPage }        from '@/pages/GoalsPage';
+import { AIAssistantPage }  from '@/pages/AIAssistantPage';
 
 // ── Query client ──────────────────────────────────────────────────────────────
 const queryClient = new QueryClient({
@@ -200,7 +201,7 @@ function AppContent() {
           <Route path="/networth"     element={<NetWorthPage />} />
           <Route path="/goals"        element={<GoalsPage />} />
           <Route path="/analytics"    element={<AnalyticsPage />} />
-          <Route path="/ai-chat"      element={<ComingSoon title="AI Assistant" />} />
+          <Route path="/ai-chat"      element={<AIAssistantPage />} />
           <Route path="/import"       element={<ComingSoon title="Import" />} />
         </Route>
       </Route>

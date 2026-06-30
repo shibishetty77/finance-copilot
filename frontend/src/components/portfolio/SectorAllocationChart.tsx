@@ -34,12 +34,12 @@ function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload as SectorData;
     return (
-      <div className="bg-surface border border-white/10 rounded-lg p-3 shadow-lg">
-        <p className="text-sm font-semibold text-white">{data.sector}</p>
-        <p className="text-xs text-white/70 mt-1">
-          Value: {formatCurrency(data.value)}
+      <div className="bg-surface-card border border-surface-border rounded-xl p-4 shadow-card-lg">
+        <p className="text-sm font-semibold text-white mb-2">{data.sector}</p>
+        <p className="text-xs text-white/60 mb-1">
+          Value: <span className="text-white font-medium">{formatCurrency(data.value)}</span>
         </p>
-        <p className="text-xs text-brand-400 font-medium mt-1">
+        <p className="text-sm text-brand-400 font-semibold">
           {data.percentage.toFixed(2)}%
         </p>
       </div>
@@ -82,7 +82,7 @@ export function SectorAllocationChart({
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="fc-card">
         <CardHeader>
           <CardTitle>Sector Allocation</CardTitle>
         </CardHeader>
@@ -98,7 +98,7 @@ export function SectorAllocationChart({
 
   if (!holdings || holdings.length === 0 || totalValue === 0) {
     return (
-      <Card>
+      <Card className="fc-card">
         <CardHeader>
           <CardTitle>Sector Allocation</CardTitle>
         </CardHeader>
@@ -112,7 +112,7 @@ export function SectorAllocationChart({
   }
 
   return (
-    <Card>
+    <Card className="fc-card">
       <CardHeader>
         <CardTitle>Sector Allocation</CardTitle>
       </CardHeader>
@@ -124,10 +124,12 @@ export function SectorAllocationChart({
               data={allocationData}
               cx="50%"
               cy="50%"
-              outerRadius={70}
-              innerRadius={40}
+              outerRadius={75}
+              innerRadius={45}
               fill="#8884d8"
               dataKey="value"
+              strokeWidth={2}
+              stroke="#161627"
             >
               {allocationData.map((_, index) => (
                 <Cell
@@ -142,7 +144,11 @@ export function SectorAllocationChart({
               height={36}
               formatter={(_, entry) => {
                 const data = entry.payload as unknown as SectorData;
-                return `${data.sector} (${data.percentage.toFixed(1)}%)`;
+                return (
+                  <span className="text-xs text-white/70">
+                    {data.sector} <span className="text-white font-medium">({data.percentage.toFixed(1)}%)</span>
+                  </span>
+                );
               }}
               wrapperStyle={{
                 paddingTop: '16px',
@@ -164,16 +170,16 @@ export function SectorAllocationChart({
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    className="w-3 h-3 rounded-full flex-shrink-0 shadow-lg"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   />
                   <p className="text-sm font-medium text-white">{item.sector}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-white tabular-nums">
                     {item.percentage.toFixed(2)}%
                   </p>
-                  <p className="text-xs text-white/50">
+                  <p className="text-xs text-white/50 tabular-nums">
                     {formatCurrency(item.value)}
                   </p>
                 </div>

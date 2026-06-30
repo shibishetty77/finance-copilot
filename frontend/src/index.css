@@ -4,16 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── CSS Custom Properties ──────────────────────────────────────────────────── */
 :root {
   --color-brand: 99 102 241;
   --color-income: 16 185 129;
   --color-expense: 244 63 94;
   --sidebar-width: 256px;
   --topbar-height: 64px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
 }
 
-/* ── Base Reset ─────────────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply box-border;
@@ -31,7 +35,6 @@
     min-height: 100vh;
   }
 
-  /* Scrollbar styling */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -46,25 +49,39 @@
     @apply bg-brand-600;
   }
 
-  /* Focus outline */
   *:focus-visible {
     @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-surface;
   }
 }
 
-/* ── Component Utilities ────────────────────────────────────────────────────── */
 @layer components {
-  /* Card */
-  .fc-card {
-    @apply bg-surface-card border border-surface-border rounded-2xl p-6 shadow-card;
+  .fc-page {
+    @apply space-y-6 animate-fade-in;
   }
 
-  /* Glass card */
+  .fc-card {
+    @apply bg-surface-card border border-surface-border rounded-2xl p-6 shadow-card
+           transition-all duration-300 ease-out;
+  }
+
+  .fc-card-interactive {
+    @apply fc-card hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-card-lg cursor-pointer;
+  }
+
+  .fc-card-sm {
+    @apply bg-surface-card border border-surface-border rounded-2xl p-4 shadow-card
+           transition-all duration-300 ease-out;
+  }
+
+  .fc-card-lg {
+    @apply bg-surface-card border border-surface-border rounded-2xl p-8 shadow-card
+           transition-all duration-300 ease-out;
+  }
+
   .fc-glass {
     @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
   }
 
-  /* Input base */
   .fc-input {
     @apply w-full bg-surface-input border border-surface-border rounded-xl px-4 py-3
            text-white placeholder-white/30 text-sm
@@ -72,91 +89,202 @@
            transition-colors duration-200;
   }
 
-  /* Primary button */
+  .fc-input-lg {
+    @apply w-full bg-surface-input border border-surface-border rounded-xl px-5 py-4
+           text-white placeholder-white/30 text-base
+           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500
+           transition-colors duration-200;
+  }
+
   .fc-btn-primary {
-    @apply inline-flex items-center justify-center gap-2
-           bg-brand-600 hover:bg-brand-500 active:bg-brand-700
+    @apply inline-flex items-center justify-center gap-2 h-11
+           bg-brand-600 hover:bg-brand-500 active:scale-[0.97] active:bg-brand-700
            text-white font-semibold text-sm
-           px-5 py-3 rounded-xl
-           transition-all duration-200
-           disabled:opacity-50 disabled:cursor-not-allowed
+           px-5 rounded-xl
+           transition-all duration-200 ease-out
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-glow
            shadow-glow hover:shadow-glow-lg;
   }
 
-  /* Secondary button */
   .fc-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2
-           bg-surface-input hover:bg-surface-hover border border-surface-border hover:border-brand-500
+    @apply inline-flex items-center justify-center gap-2 h-11
+           bg-surface-input hover:bg-surface-hover active:scale-[0.97]
+           border border-surface-border hover:border-brand-500/50
            text-white/70 hover:text-white font-medium text-sm
-           px-5 py-3 rounded-xl
-           transition-all duration-200
-           disabled:opacity-50 disabled:cursor-not-allowed;
+           px-5 rounded-xl
+           transition-all duration-200 ease-out
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:border-surface-border;
   }
 
-  /* Ghost button */
   .fc-btn-ghost {
     @apply inline-flex items-center justify-center gap-2
-           text-white/60 hover:text-white hover:bg-surface-hover
+           text-white/60 hover:text-white hover:bg-surface-hover active:scale-[0.97]
            font-medium text-sm px-3 py-2 rounded-lg
-           transition-all duration-200;
+           transition-all duration-200 ease-out;
   }
 
-  /* Badge */
+  .fc-btn-danger {
+    @apply inline-flex items-center justify-center gap-2 h-11
+           bg-expense/10 hover:bg-expense/20 active:scale-[0.97]
+           border border-expense/30 hover:border-expense/50
+           text-expense hover:text-expense font-medium text-sm
+           px-5 rounded-xl
+           transition-all duration-200 ease-out
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:bg-expense/10;
+  }
+
+  .fc-btn-sm {
+    @apply inline-flex items-center justify-center gap-2 h-9
+           text-white/70 hover:text-white hover:bg-surface-hover active:scale-[0.97]
+           font-medium text-xs px-3 rounded-lg
+           transition-all duration-200 ease-out;
+  }
+
   .fc-badge {
     @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
-  /* Shimmer skeleton */
+  .fc-badge-brand {
+    @apply fc-badge bg-brand-500/10 text-brand-300 border border-brand-500/20;
+  }
+
+  .fc-badge-success {
+    @apply fc-badge bg-income/10 text-income border border-income/20;
+  }
+
+  .fc-badge-warning {
+    @apply fc-badge bg-warning/10 text-warning border border-warning/20;
+  }
+
+  .fc-badge-danger {
+    @apply fc-badge bg-expense/10 text-expense border border-expense/20;
+  }
+
+  .fc-badge-neutral {
+    @apply fc-badge bg-white/5 text-white/60 border border-white/10;
+  }
+
   .fc-skeleton {
     @apply bg-shimmer-gradient bg-[length:200%_100%] animate-shimmer
            bg-surface-input rounded-lg;
   }
 
-  /* Amount positive */
+  .fc-skeleton-text {
+    @apply fc-skeleton h-4 w-full;
+  }
+
+  .fc-skeleton-avatar {
+    @apply fc-skeleton h-10 w-10 rounded-full;
+  }
+
+  .fc-skeleton-card {
+    @apply fc-skeleton h-32 w-full rounded-2xl;
+  }
+
   .fc-amount-income {
     @apply text-income font-semibold tabular-nums;
   }
 
-  /* Amount negative */
   .fc-amount-expense {
     @apply text-expense font-semibold tabular-nums;
   }
 
-  /* Sidebar link */
   .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 font-medium text-sm
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/55 font-medium text-sm
            hover:bg-surface-hover hover:text-white
-           transition-all duration-200 cursor-pointer;
+           transition-all duration-200 ease-out cursor-pointer relative;
   }
 
   .sidebar-link.active {
-    @apply bg-brand-600/20 text-brand-400 border border-brand-500/30;
+    @apply bg-brand-600/20 text-brand-300 font-semibold;
   }
 
-  /* Label */
+  .sidebar-link.active::before {
+    content: '';
+    @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-brand-500 shadow-glow;
+  }
+
   .fc-label {
-    @apply block text-xs font-medium text-white/50 uppercase tracking-wider mb-1.5;
+    @apply block text-xs font-medium text-white/50 mb-2;
   }
 
-  /* Section heading */
+  .fc-label-lg {
+    @apply block text-sm font-medium text-white/60 mb-3;
+  }
+
   .fc-heading {
-    @apply text-xl font-bold text-white;
+    @apply text-2xl font-bold text-white tracking-tight leading-tight;
   }
 
-  /* Sub heading */
+  .fc-heading-lg {
+    @apply text-3xl font-bold text-white tracking-tight leading-tight;
+  }
+
   .fc-subheading {
-    @apply text-sm text-white/50;
+    @apply text-sm text-white/50 leading-relaxed mt-1;
+  }
+
+  .fc-stat-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+  }
+
+  .fc-stat-grid-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+
+  .fc-list-row {
+    @apply flex items-center gap-4 p-3 rounded-xl border border-transparent
+           hover:bg-surface-hover hover:border-surface-border
+           transition-all duration-200 ease-out;
+  }
+
+  .fc-progress-bar {
+    @apply h-2 rounded-full bg-white/5 overflow-hidden;
+  }
+
+  .fc-progress-bar-lg {
+    @apply h-3 rounded-full bg-white/5 overflow-hidden;
+  }
+
+  .fc-progress-fill {
+    @apply h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-400
+           transition-all duration-1000 ease-out;
+  }
+
+  .fc-icon-btn {
+    @apply inline-flex items-center justify-center p-2 rounded-lg
+           text-white/40 hover:text-white hover:bg-surface-hover active:scale-95
+           transition-all duration-200 ease-out;
+  }
+
+  .fc-section {
+    @apply space-y-4;
+  }
+
+  .fc-divider {
+    @apply h-px bg-surface-border my-6;
+  }
+
+  .fc-stat-card {
+    @apply fc-card-interactive min-h-[140px] flex flex-col justify-between;
+  }
+
+  .fc-stat-value {
+    @apply text-2xl font-bold text-white tabular-nums tracking-tight animate-scale-in;
+  }
+
+  .fc-stat-icon {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 ease-out hover:scale-110;
   }
 }
 
-/* ── Utility overrides ──────────────────────────────────────────────────────── */
 @layer utilities {
   .text-gradient {
     @apply bg-gradient-to-r from-brand-400 to-purple-400 bg-clip-text text-transparent;
   }
 
-  .border-gradient {
-    border-image: linear-gradient(135deg, rgba(99,102,241,0.5), rgba(139,92,246,0.5)) 1;
+  .duration-250 {
+    transition-duration: 250ms;
   }
 
   .no-scrollbar::-webkit-scrollbar {
