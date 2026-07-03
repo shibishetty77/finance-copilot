@@ -11,8 +11,6 @@ import {
   Plus,
   Search,
   Filter,
-  Edit2,
-  Trash2,
   Calendar,
   Tag,
   Building2,
@@ -26,6 +24,9 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
+import { KebabMenu } from '@/components/ui/KebabMenu';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
+import { TransactionHubModal } from '@/components/transactions/TransactionHubModal';
 import { transactionsApi } from '@/api/transactions';
 import { formatCurrency, formatDate } from '@/utils/formatDate';
 import type { Transaction, TransactionCreate, TransactionUpdate } from '@/types/transaction';
@@ -81,6 +82,7 @@ function SummaryCard({
 
 export function TransactionsPage() {
   const qc = useQueryClient();
+  const [isTransactionHubOpen, setIsTransactionHubOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -222,7 +224,7 @@ export function TransactionsPage() {
         </div>
         <Button
           leftIcon={<Plus className="w-4 h-4" />}
-          onClick={() => setIsAddModalOpen(true)}
+          onClick={() => setIsTransactionHubOpen(true)}
         >
           Add Transaction
         </Button>
@@ -321,22 +323,11 @@ export function TransactionsPage() {
                 key={transaction.id}
                 className="fc-list-row"
               >
-                <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110 ${
-                    transaction.type === 'income' ? 'bg-income/20' : 'bg-expense/20'
-                  }`}
-                >
-                  {(() => {
-                    // Prefer the API-loaded category icon, then fall back to local static list emoji
-                    const localCat = getCategoryById(transaction.category_id);
-                    const icon = transaction.category?.icon || localCat?.icon;
-                    return icon ? (
-                      <span className="text-lg">{icon}</span>
-                    ) : (
-                      <IndianRupee className="w-5 h-5 text-white/60" strokeWidth={2} />
-                    );
-                  })()}
-                </div>
+                <CategoryIcon
+                  categoryId={transaction.category_id}
+                  categoryName={transaction.category?.name}
+                  transactionType={transaction.type}
+                />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">
                     {transaction.description || transaction.merchant_name || 'Transaction'}
@@ -359,22 +350,11 @@ export function TransactionsPage() {
                     {formatCurrency(transaction.amount)}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <button
-                    className="fc-icon-btn"
-                    onClick={() => openEditModal(transaction)}
-                    aria-label="Edit transaction"
-                  >
-                    <Edit2 className="w-4 h-4" strokeWidth={2} />
-                  </button>
-                  <button
-                    className="fc-icon-btn text-expense/60 hover:text-expense"
-                    onClick={() => openDeleteModal(transaction)}
-                    aria-label="Delete transaction"
-                  >
-                    <Trash2 className="w-4 h-4" strokeWidth={2} />
-                  </button>
-                </div>
+                <KebabMenu
+                  onEdit={() => openEditModal(transaction)}
+                  onDelete={() => openDeleteModal(transaction)}
+                  ariaLabel="Transaction actions"
+                />
               </div>
             ))}
           </div>
@@ -466,6 +446,13 @@ export function TransactionsPage() {
           </Button>
         </div>
       </Modal>
+
+      {/* Transaction Hub Modal */}
+      <TransactionHubModal
+        open={isTransactionHubOpen}
+        onClose={() => setIsTransactionHubOpen(false)}
+        onManualEntry={() => setIsAddModalOpen(true)}
+      />
     </div>
   );
 }

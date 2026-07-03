@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Loader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
+import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { transactionsApi } from '@/api/transactions';
@@ -204,17 +205,11 @@ export function DashboardPage() {
                   key={transaction.id}
                   className="fc-list-row"
                 >
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      transaction.type === 'income' ? 'bg-income/20' : 'bg-expense/20'
-                    }`}
-                  >
-                    {transaction.category?.icon ? (
-                      <span className="text-lg">{transaction.category.icon}</span>
-                    ) : (
-                      <IndianRupee className="w-5 h-5 text-white/60" />
-                    )}
-                  </div>
+                  <CategoryIcon
+                    categoryId={transaction.category_id}
+                    categoryName={transaction.category?.name}
+                    transactionType={transaction.type}
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white truncate">
                       {transaction.description || transaction.merchant_name || 'Transaction'}

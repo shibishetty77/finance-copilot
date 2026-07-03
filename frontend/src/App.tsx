@@ -16,6 +16,7 @@ import { authApi } from '@/api/auth';
 import { tokenStorage } from '@/api/client';
 import { AppShell } from '@/components/layout/AppShell';
 import { Loader } from '@/components/ui/Loader';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // ── Pages ─────────────────────────────────────────────────────────────────────
 import { LoginPage }         from '@/pages/LoginPage';
@@ -154,11 +155,13 @@ function ComingSoon({ title }: { title: string }) {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </BrowserRouter>
+      </ToastProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );

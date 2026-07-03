@@ -6,14 +6,16 @@ import { goalsApi } from '@/api/goals';
 import { transactionsApi } from '@/api/transactions';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Loader, Skeleton } from '@/components/ui/Loader';
+import { Modal } from '@/components/ui/Modal';
 import { CreateGoalModal } from '@/components/goals/CreateGoalModal';
 import { GoalCard } from '@/components/goals/GoalCard';
 import { GoalsInsights } from '@/components/goals/GoalsInsights';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { computeGoalStats } from '@/utils/goalHelpers';
-import type { GoalCreate } from '@/types/goal';
+import type { GoalCreate, Goal, GoalUpdate } from '@/types/goal';
 
 function SummaryCard({
   label,
@@ -42,6 +44,9 @@ function SummaryCard({
 export function GoalsPage() {
   const qc = useQueryClient();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
 
   const { data: goals, isLoading } = useQuery({
     queryKey: ['goals'],
@@ -62,6 +67,40 @@ export function GoalsPage() {
       setIsCreateOpen(false);
     },
   });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: GoalUpdate }) => goalsApi.update(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['goals'] });
+      setIsEditOpen(false);
+      setSelectedGoal(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => goalsApi.delete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['goals'] });
+      setIsDeleteOpen(false);
+      setSelectedGoal(null);
+    },
+  });
+
+  const openEditModal = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setIsEditOpen(true);
+  };
+
+  const openDeleteModal = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setIsDeleteOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (selectedGoal) {
+      deleteMutation.mutate(selectedGoal.id);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -145,7 +184,13 @@ export function GoalsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
             {goals.map((goal) => (
-              <GoalCard key={goal.id} goal={goal} monthlySummaries={monthlySummaries} />
+              <GoalCard
+                key={goal.id}
+                goal={goal}
+                monthlySummaries={monthlySummaries}
+                onEdit={openEditModal}
+                onDelete={openDeleteModal}
+              />
             ))}
           </div>
           <div>
@@ -160,6 +205,118 @@ export function GoalsPage() {
         onSubmit={(data) => createMutation.mutate(data)}
         isSubmitting={createMutation.isPending}
       />
+
+      {/* Edit Goal Modal */}
+      <Modal
+        open={isEditOpen}
+        onClose={() => {
+          setIsEditOpen(false);
+          setSelectedGoal(null);
+        }}
+        title="Edit Goal"
+      >
+        <form onSubmit={(e: React.FormEvent) => {
+          e.preventDefault();
+          if (selectedGoal) {
+            const updateData: GoalUpdate = {};
+            if (selectedGoal.name) updateData.name = selectedGoal.name;
+            if (selectedGoal.target_amount !== undefined) updateData.target_amount = selectedGoal.target_amount;
+            if (selectedGoal.current_amount !== undefined) updateData.current_amount = selectedGoal.current_amount;
+            if (selectedGoal.target_date) updateData.target_date = selectedGoal.target_date;
+            if (selectedGoal.description !== undefined && selectedGoal.description !== null) updateData.description = selectedGoal.description;
+            updateMutation.mutate({
+              id: selectedGoal.id,
+              data: updateData
+            });
+          }
+        }} className="space-y-4">
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">Goal Name</label>
+            <Input
+              value={selectedGoal?.name || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedGoal(prev => prev ? { ...prev, name: e.target.value } : null)}
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">Target Amount (₹)</label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={selectedGoal?.target_amount || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedGoal(prev => prev ? { ...prev, target_amount: parseFloat(e.target.value) || 0 } : null)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">Current Amount (₹)</label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                value={selectedGoal?.current_amount || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedGoal(prev => prev ? { ...prev, current_amount: parseFloat(e.target.value) || 0 } : null)}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">Target Date (optional)</label>
+            <Input
+              type="date"
+              value={selectedGoal?.target_date?.split('T')[0] || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedGoal(prev => prev ? { ...prev, target_date: e.target.value } : null)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">Description (optional)</label>
+            <Input
+              value={selectedGoal?.description || ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedGoal(prev => prev ? { ...prev, description: e.target.value } : null)}
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="secondary" onClick={() => {
+              setIsEditOpen(false);
+              setSelectedGoal(null);
+            }}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={updateMutation.isPending}>
+              Save Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        open={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+          setSelectedGoal(null);
+        }}
+        title="Delete Goal"
+        description="Are you sure you want to delete this goal? This action cannot be undone."
+      >
+        <div className="flex gap-3 justify-end mt-6">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setIsDeleteOpen(false);
+              setSelectedGoal(null);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            loading={deleteMutation.isPending}
+          >
+            Delete
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

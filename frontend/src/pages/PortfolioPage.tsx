@@ -9,8 +9,6 @@ import {
   Wallet,
   Plus,
   Search,
-  Edit2,
-  Trash2,
   PieChart,
   Shield,
   IndianRupee,
@@ -20,6 +18,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Modal } from '@/components/ui/Modal';
+import { KebabMenu } from '@/components/ui/KebabMenu';
 import { PortfolioAllocationChart } from '@/components/portfolio/PortfolioAllocationChart';
 import { SectorAllocationChart } from '@/components/portfolio/SectorAllocationChart';
 import { TopHoldingsWidget } from '@/components/portfolio/TopHoldingsWidget';
@@ -514,22 +513,11 @@ export function PortfolioPage() {
                           </span>
                         </p>
                       </div>
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <button
-                          className="fc-icon-btn"
-                          onClick={() => openEditModal(holding)}
-                          aria-label="Edit holding"
-                        >
-                          <Edit2 className="w-4 h-4" strokeWidth={2} />
-                        </button>
-                        <button
-                          className="fc-icon-btn text-expense/60 hover:text-expense"
-                          onClick={() => openDeleteModal(holding)}
-                          aria-label="Delete holding"
-                        >
-                          <Trash2 className="w-4 h-4" strokeWidth={2} />
-                        </button>
-                      </div>
+                      <KebabMenu
+                        onEdit={() => openEditModal(holding)}
+                        onDelete={() => openDeleteModal(holding)}
+                        ariaLabel="Holding actions"
+                      />
                     </div>
                   </div>
                 ))

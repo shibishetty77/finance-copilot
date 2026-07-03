@@ -1,6 +1,7 @@
 import { Calendar, Target } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { KebabMenu } from '@/components/ui/KebabMenu';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { formatDate } from '@/utils/formatDate';
 import type { Goal } from '@/types/goal';
@@ -15,6 +16,8 @@ import {
 interface GoalCardProps {
   goal: Goal;
   monthlySummaries?: TransactionMonthlySummary[];
+  onEdit?: (goal: Goal) => void;
+  onDelete?: (goal: Goal) => void;
 }
 
 function statusVariant(status: ReturnType<typeof getGoalStatus>): 'income' | 'warning' | 'brand' {
@@ -28,7 +31,7 @@ function statusVariant(status: ReturnType<typeof getGoalStatus>): 'income' | 'wa
   }
 }
 
-export function GoalCard({ goal, monthlySummaries }: GoalCardProps) {
+export function GoalCard({ goal, monthlySummaries, onEdit, onDelete }: GoalCardProps) {
   const progress = getGoalProgress(goal);
   const remaining = getGoalRemaining(goal);
   const status = getGoalStatus(goal);
@@ -48,9 +51,18 @@ export function GoalCard({ goal, monthlySummaries }: GoalCardProps) {
             )}
           </div>
         </div>
-        <Badge variant={statusVariant(status)} dot>
-          {status}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant={statusVariant(status)} dot>
+            {status}
+          </Badge>
+          {onEdit && onDelete && (
+            <KebabMenu
+              onEdit={() => onEdit(goal)}
+              onDelete={() => onDelete(goal)}
+              ariaLabel="Goal actions"
+            />
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
