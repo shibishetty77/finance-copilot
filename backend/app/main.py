@@ -18,6 +18,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.config import settings
 from app.core.exceptions import AppException, app_exception_handler
 from app.core.rate_limiter import limiter
+from app.modules.ai.router import router as ai_router
 from app.modules.auth.router import router as auth_router
 from app.modules.goals.router import router as goals_router
 from app.modules.portfolio.router import router as portfolio_router
@@ -79,6 +80,7 @@ def create_app() -> FastAPI:
 
     # ── Routers ───────────────────────────────────────────────────────────────
     API_V1 = "/api/v1"
+    app.include_router(ai_router, prefix=API_V1)
     app.include_router(auth_router, prefix=API_V1)
     app.include_router(transactions_router, prefix=API_V1)
     app.include_router(portfolio_router, prefix=API_V1)
