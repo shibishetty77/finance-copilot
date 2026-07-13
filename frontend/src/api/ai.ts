@@ -5,15 +5,15 @@
  * directly. All AI interactions must go through this client.
  *
  * Current endpoints:
- *   health()    → GET  /api/v1/ai/health   (public)
- *   generate()  → POST /api/v1/ai/generate (auth required)
+ *   health()          → GET  /api/v1/ai/health   (public)
+ *   generate()        → POST /api/v1/ai/generate (auth required)
+ *   parseTransaction() → POST /api/v1/ai/generate (auth required, Smart Entry)
  *
  * Future stubs (implemented when the features are built):
- *   assistant()        — AI Financial Assistant
- *   parseTransaction() — Smart Entry / transaction parsing
- *   ocr()              — Receipt OCR
- *   parseSms()         — SMS bank alert parsing
- *   parseStatement()   — Bank statement import
+ *   assistant()      — AI Financial Assistant
+ *   ocr()            — Receipt OCR
+ *   parseSms()       — SMS bank alert parsing
+ *   parseStatement() — Bank statement import
  */
 
 import { apiClient } from './client';
@@ -81,14 +81,17 @@ export const aiApi = {
   },
 
   /**
-   * @future Smart Entry — parse a transaction description into structured data.
-   * Endpoint: POST /api/v1/ai/parse-transaction
+   * Smart Entry — parse a natural-language transaction description.
+   *
+   * Sends the description as a prompt to the existing /ai/generate endpoint.
+   * The caller is responsible for building the prompt (via buildTransactionPrompt)
+   * and parsing the JSON response (via parseTransactionResponse).
+   *
+   * Endpoint: POST /api/v1/ai/generate
    */
-  parseTransaction: async (_request: AIRequest): Promise<StructuredResponse> => {
-    throw new Error(
-      'aiApi.parseTransaction() is not yet implemented. ' +
-      'It will be available when the Smart Entry feature is built.'
-    );
+  parseTransaction: async (request: AIRequest): Promise<AIResponse> => {
+    const res = await apiClient.post<AIResponse>('/ai/generate', request);
+    return res.data;
   },
 
   /**

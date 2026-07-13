@@ -27,6 +27,7 @@ import { Modal } from '@/components/ui/Modal';
 import { KebabMenu } from '@/components/ui/KebabMenu';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { TransactionHubModal } from '@/components/transactions/TransactionHubModal';
+import { AISmartEntryModal, type TransactionPrefill } from '@/components/transactions/AISmartEntryModal';
 import { transactionsApi } from '@/api/transactions';
 import { formatCurrency, formatDate } from '@/utils/formatDate';
 import type { Transaction, TransactionCreate, TransactionUpdate } from '@/types/transaction';
@@ -84,6 +85,7 @@ export function TransactionsPage() {
   const qc = useQueryClient();
   const [isTransactionHubOpen, setIsTransactionHubOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAISmartEntryOpen, setIsAISmartEntryOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -208,6 +210,33 @@ export function TransactionsPage() {
 
   const handleFilterChange = (key: string, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
+  };
+
+  // ── AI Smart Entry handlers ─────────────────────────────────────────────────
+
+  const handleAISmartEntryOpen = () => {
+    setIsTransactionHubOpen(false);
+    setIsAISmartEntryOpen(true);
+  };
+
+  /**
+   * Called when the user clicks Continue on the AI Review screen.
+   * Pre-fills the existing Add Transaction form and opens it.
+   * Zero form logic is duplicated here.
+   */
+  const handleAIContinue = (prefill: TransactionPrefill) => {
+    setIsAISmartEntryOpen(false);
+    addForm.reset({
+      description: prefill.description,
+      amount: prefill.amount,
+      type: prefill.type,
+      category_id: prefill.category_id,
+      transaction_date: prefill.transaction_date,
+      merchant_name: prefill.merchant_name,
+      notes: prefill.notes,
+      is_recurring: false,
+    });
+    setIsAddModalOpen(true);
   };
 
   const handlePageChange = (page: number) => {
@@ -452,6 +481,14 @@ export function TransactionsPage() {
         open={isTransactionHubOpen}
         onClose={() => setIsTransactionHubOpen(false)}
         onManualEntry={() => setIsAddModalOpen(true)}
+        onAISmartEntry={handleAISmartEntryOpen}
+      />
+
+      {/* AI Smart Entry Modal */}
+      <AISmartEntryModal
+        open={isAISmartEntryOpen}
+        onClose={() => setIsAISmartEntryOpen(false)}
+        onContinue={handleAIContinue}
       />
     </div>
   );

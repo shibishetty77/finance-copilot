@@ -15,6 +15,7 @@ That is the only change required.
 
 import json
 import logging
+import traceback
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -253,6 +254,9 @@ class GeminiProvider(AIProvider):
     @staticmethod
     def _handle_provider_error(exc: Exception) -> None:
         """Map provider-specific errors to our domain exceptions."""
+        # DEBUG: print the original exception so it is visible in the server log
+        traceback.print_exc()                              # ← prints original Gemini exception
+        logger.error("[DEBUG] Original exception repr: %s", repr(exc))
         error_str = str(exc).lower()
         if "timeout" in error_str or "deadline" in error_str:
             raise AITimeoutError() from exc

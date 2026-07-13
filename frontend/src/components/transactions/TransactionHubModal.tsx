@@ -14,6 +14,7 @@ interface TransactionHubModalProps {
   open: boolean;
   onClose: () => void;
   onManualEntry: () => void;
+  onAISmartEntry: () => void;
 }
 
 interface ImportMethod {
@@ -38,8 +39,7 @@ const importMethods: ImportMethod[] = [
     title: 'AI Smart Entry',
     description: 'Describe your transaction naturally.',
     icon: Sparkles,
-    status: 'coming-soon',
-    toastMessage: 'AI Smart Entry will be available soon.',
+    status: 'available',
   },
   {
     id: 'bank-statement',
@@ -79,13 +79,17 @@ export function TransactionHubModal({
   open,
   onClose,
   onManualEntry,
+  onAISmartEntry,
 }: TransactionHubModalProps) {
   const { showToast } = useToast();
 
   const handleCardClick = (method: ImportMethod) => {
-    if (method.status === 'available') {
+    if (method.id === 'manual') {
       onClose();
       onManualEntry();
+    } else if (method.id === 'ai') {
+      onClose();
+      onAISmartEntry();
     } else {
       showToast(method.toastMessage || 'Coming soon', 'info');
     }
