@@ -29,6 +29,9 @@ import { NetWorthPage }     from '@/pages/NetWorthPage';
 import { AnalyticsPage }    from '@/pages/AnalyticsPage';
 import { GoalsPage }        from '@/pages/GoalsPage';
 import { AIAssistantPage }  from '@/pages/AIAssistantPage';
+import { AISettingsPage }  from '@/pages/AISettingsPage';
+import { GmailCallbackPage } from '@/pages/GmailCallbackPage';
+
 
 // ── Query client ──────────────────────────────────────────────────────────────
 const queryClient = new QueryClient({
@@ -205,6 +208,8 @@ function AppContent() {
           <Route path="/goals"        element={<GoalsPage />} />
           <Route path="/analytics"    element={<AnalyticsPage />} />
           <Route path="/ai-chat"      element={<AIAssistantPage />} />
+          <Route path="/ai-settings"  element={<AISettingsPage />} />
+          <Route path="/gmail-callback" element={<GmailCallbackPage />} />
           <Route path="/import"       element={<ComingSoon title="Import" />} />
         </Route>
       </Route>

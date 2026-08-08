@@ -16,7 +16,6 @@ from pydantic import BaseModel, Field
 
 # ── Request schemas ───────────────────────────────────────────────────────────
 
-
 class AIRequest(BaseModel):
     """Plain text generation request."""
 
@@ -49,8 +48,42 @@ class ChatRequest(BaseModel):
     context: str | None = Field(None, max_length=8_000, description="Optional system-level context.")
 
 
-# ── Response schemas ──────────────────────────────────────────────────────────
+class UpdateAISettingsRequest(BaseModel):
+    """Request to update AI settings."""
 
+    mode: Literal["cloud", "byok"] | None = None
+    provider: Literal["openrouter", "gemini", "openai", "claude", "ollama"] | None = None
+    api_key: str | None = Field(None, description="API key (will be encrypted before storage)")
+    base_url: str | None = None
+    default_model: str | None = None
+    assistant_model: str | None = None
+    smart_entry_model: str | None = None
+    ocr_model: str | None = None
+    sms_model: str | None = None
+    gmail_model: str | None = None
+    investment_advisor_model: str | None = None
+    cloud_fallback_enabled: bool | None = None
+
+
+class TestAISettingsRequest(BaseModel):
+    """Request to test AI settings."""
+
+    mode: Literal["cloud", "byok"]
+    provider: Literal["openrouter", "gemini", "openai", "claude", "ollama"] | None = None
+    api_key: str | None = None
+    base_url: str | None = None
+    model: str | None = None
+
+
+class ListModelsRequest(BaseModel):
+    """Request to list available models for a provider."""
+
+    provider: Literal["openrouter", "gemini", "openai", "claude", "ollama"]
+    api_key: str | None = None
+    base_url: str | None = None
+
+
+# ── Response schemas ──────────────────────────────────────────────────────────
 
 class AIResponse(BaseModel):
     """Response from a plain text generation call."""
@@ -88,3 +121,37 @@ class AIHealthResponse(BaseModel):
     provider: str = Field(..., description="Configured AI provider name.")
     model: str = Field(..., description="Configured model name.")
     status: Literal["ready", "misconfigured"] = Field(..., description="'ready' if the provider is usable.")
+
+
+class AISettingsResponse(BaseModel):
+    """Response with AI settings (masked API key)."""
+
+    mode: str
+    provider: str
+    masked_api_key: str | None = Field(None, description="Masked API key (e.g. 'sk-...abcd')")
+    base_url: str | None
+    default_model: str | None
+    assistant_model: str | None
+    smart_entry_model: str | None
+    ocr_model: str | None
+    sms_model: str | None
+    gmail_model: str | None
+    investment_advisor_model: str | None
+    cloud_fallback_enabled: bool
+
+
+class TestAISettingsResponse(BaseModel):
+    """Response from testing AI settings."""
+
+    connected: bool
+    provider: str | None
+    model: str | None
+    latency_ms: float | None
+    status: str
+    error: str | None = None
+
+
+class ListModelsResponse(BaseModel):
+    """Response with list of available models."""
+
+    models: list[str]

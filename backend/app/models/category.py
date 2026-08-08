@@ -3,7 +3,7 @@ SQLAlchemy ORM model for the categories table.
 Seeded with default expense categories on first run.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -36,7 +36,7 @@ class Category(Base):
 
 
 # ── Default category seed data ────────────────────────────────────────────────
-DEFAULT_CATEGORIES: list[dict] = [
+DEFAULT_CATEGORIES: list[dict[str, Any]] = [
     {"name": "Food",           "icon": "food",           "color": "#FF6B6B"},
     {"name": "Groceries",      "icon": "groceries",      "color": "#4ECDC4"},
     {"name": "Transport",      "icon": "transport",      "color": "#45B7D1"},

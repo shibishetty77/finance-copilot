@@ -38,7 +38,7 @@ def _create_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     payload = data.copy()
     payload["exp"] = datetime.now(UTC) + expires_delta
     payload["iat"] = datetime.now(UTC)
-    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)  # type: ignore[no-any-return]
 
 
 def create_access_token(subject: str) -> str:
@@ -62,7 +62,7 @@ def decode_token(token: str) -> dict[str, Any]:
     Decode and validate a JWT token.
     Raises JWTError on invalid/expired tokens.
     """
-    return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+    return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])  # type: ignore[no-any-return]
 
 
 def verify_access_token(token: str) -> str:

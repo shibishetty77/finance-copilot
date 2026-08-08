@@ -38,6 +38,38 @@ export interface ChatRequest {
   context?: string;
 }
 
+export type AIMode = 'cloud' | 'byok';
+export type AIProvider = 'openrouter' | 'gemini' | 'openai' | 'claude' | 'ollama';
+
+export interface UpdateAISettingsRequest {
+  mode?: AIMode;
+  provider?: AIProvider;
+  api_key?: string;
+  base_url?: string;
+  default_model?: string;
+  assistant_model?: string;
+  smart_entry_model?: string;
+  ocr_model?: string;
+  sms_model?: string;
+  gmail_model?: string;
+  investment_advisor_model?: string;
+  cloud_fallback_enabled?: boolean;
+}
+
+export interface TestAISettingsRequest {
+  mode: AIMode;
+  provider?: AIProvider;
+  api_key?: string;
+  base_url?: string;
+  model?: string;
+}
+
+export interface ListModelsRequest {
+  provider: AIProvider;
+  api_key?: string;
+  base_url?: string;
+}
+
 // ── Response types ────────────────────────────────────────────────────────────
 
 /** Response from a plain text generation call. */
@@ -83,3 +115,68 @@ export interface AIHealthResponse {
   /** "ready" if the provider is correctly configured, "misconfigured" otherwise. */
   status: 'ready' | 'misconfigured';
 }
+
+export interface AISettingsResponse {
+  mode: string;
+  provider: string;
+  masked_api_key: string | null;
+  base_url: string | null;
+  default_model: string | null;
+  assistant_model: string | null;
+  smart_entry_model: string | null;
+  ocr_model: string | null;
+  sms_model: string | null;
+  gmail_model: string | null;
+  investment_advisor_model: string | null;
+  cloud_fallback_enabled: boolean;
+}
+
+export interface TestAISettingsResponse {
+  connected: boolean;
+  provider: string | null;
+  model: string | null;
+  latency_ms: number | null;
+  status: string;
+  error: string | null;
+}
+
+export interface ListModelsResponse {
+  models: string[];
+}
+
+// ── AI Finance Assistant types ────────────────────────────────────────────────
+
+/** A single persisted chat message. */
+export interface AssistantMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+}
+
+/** Request to send a message to the AI Finance Assistant. */
+export interface AssistantChatRequest {
+  message: string;
+  conversation_id?: string;
+}
+
+/** Response from the AI Finance Assistant chat endpoint. */
+export interface AssistantChatResponse {
+  response: string;
+  conversation_id: string;
+  latency_ms: number;
+  error?: string | null;
+}
+
+/** Full conversation history response. */
+export interface AssistantHistoryResponse {
+  messages: AssistantMessage[];
+  conversation_id: string;
+}
+
+/** Response from clearing conversation history. */
+export interface ClearHistoryResponse {
+  deleted: number;
+  conversation_id: string;
+}
+

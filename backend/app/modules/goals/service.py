@@ -3,6 +3,7 @@ Goal service — business logic for goal CRUD operations.
 """
 
 import uuid
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -46,7 +47,7 @@ class GoalService:
         if not existing:
             raise NotFoundError("Goal")
 
-        values: dict = {}
+        values: dict[str, Any] = {}
         if payload.name is not None:
             values["name"] = payload.name
         if payload.target_amount is not None:

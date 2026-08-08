@@ -15,6 +15,10 @@ interface TransactionHubModalProps {
   onClose: () => void;
   onManualEntry: () => void;
   onAISmartEntry: () => void;
+  onScanReceipt: () => void;
+  onBankStatementImport: () => void;
+  onSmsImport: () => void;
+  onGmailImport: () => void;
 }
 
 interface ImportMethod {
@@ -46,32 +50,28 @@ const importMethods: ImportMethod[] = [
     title: 'Bank Statement',
     description: 'Import PDF or CSV bank statements.',
     icon: FileSpreadsheet,
-    status: 'coming-soon',
-    toastMessage: 'Bank Statement Import is under development.',
+    status: 'available',
   },
   {
     id: 'receipt',
     title: 'Scan Receipt',
     description: 'Extract transactions from receipts.',
     icon: Receipt,
-    status: 'coming-soon',
-    toastMessage: 'Receipt OCR will be available soon.',
+    status: 'available',
   },
   {
     id: 'gmail',
     title: 'Gmail Import',
     description: 'Import transactions from bank emails.',
     icon: Mail,
-    status: 'coming-soon',
-    toastMessage: 'Gmail integration is planned.',
+    status: 'available',
   },
   {
     id: 'sms',
     title: 'Paste SMS',
     description: 'Paste a bank SMS and extract transaction details.',
     icon: MessageSquare,
-    status: 'coming-soon',
-    toastMessage: 'SMS parser is coming soon.',
+    status: 'available',
   },
 ];
 
@@ -80,6 +80,10 @@ export function TransactionHubModal({
   onClose,
   onManualEntry,
   onAISmartEntry,
+  onScanReceipt,
+  onBankStatementImport,
+  onSmsImport,
+  onGmailImport,
 }: TransactionHubModalProps) {
   const { showToast } = useToast();
 
@@ -90,6 +94,18 @@ export function TransactionHubModal({
     } else if (method.id === 'ai') {
       onClose();
       onAISmartEntry();
+    } else if (method.id === 'receipt') {
+      onClose();
+      onScanReceipt();
+    } else if (method.id === 'bank-statement') {
+      onClose();
+      onBankStatementImport();
+    } else if (method.id === 'sms') {
+      onClose();
+      onSmsImport();
+    } else if (method.id === 'gmail') {
+      onClose();
+      onGmailImport();
     } else {
       showToast(method.toastMessage || 'Coming soon', 'info');
     }

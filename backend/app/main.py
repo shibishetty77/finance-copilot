@@ -5,7 +5,7 @@ Configures middleware, routers, and exception handlers.
 
 import uuid
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Any
 
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,8 +21,13 @@ from app.core.rate_limiter import limiter
 from app.modules.ai.router import router as ai_router
 from app.modules.auth.router import router as auth_router
 from app.modules.goals.router import router as goals_router
+from app.modules.ocr.router import router as ocr_router
 from app.modules.portfolio.router import router as portfolio_router
+from app.modules.statement_import.router import router as statement_import_router
+from app.modules.message_parser.router import router as message_parser_router
 from app.modules.transactions.router import router as transactions_router
+from app.modules.gmail_import.router import router as gmail_import_router
+
 
 
 # ── Lifespan ──────────────────────────────────────────────────────────────────
@@ -82,13 +87,17 @@ def create_app() -> FastAPI:
     API_V1 = "/api/v1"
     app.include_router(ai_router, prefix=API_V1)
     app.include_router(auth_router, prefix=API_V1)
+    app.include_router(ocr_router, prefix=API_V1)
+    app.include_router(statement_import_router, prefix=API_V1)
     app.include_router(transactions_router, prefix=API_V1)
     app.include_router(portfolio_router, prefix=API_V1)
     app.include_router(goals_router, prefix=API_V1)
+    app.include_router(message_parser_router, prefix=API_V1)
+    app.include_router(gmail_import_router, prefix=API_V1)
 
     # ── Health check ──────────────────────────────────────────────────────────
     @app.get("/health", tags=["System"], include_in_schema=False)
-    async def health() -> dict:
+    async def health() -> dict[str, Any]:
         return {"status": "ok", "version": "1.0.0"}
 
     return app

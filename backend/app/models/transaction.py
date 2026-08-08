@@ -4,12 +4,30 @@ SQLAlchemy ORM model for the transactions table.
 
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, TypeDecorator
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+import json
+
+class JSONListString(TypeDecorator[str]):
+    impl = String
+    cache_ok = True
+
+    def process_bind_param(self, value: Any, dialect: Any) -> Any:
+        return value
+
+    def process_result_value(self, value: Any, dialect: Any) -> Any:
+        if value is not None:
+            try:
+                return json.loads(value)
+            except Exception:
+                return [value]
+        return None
+
 
 if TYPE_CHECKING:
     from app.models.category import Category
@@ -51,13 +69,16 @@ class Transaction(Base):
         Date, nullable=False, index=True
     )
     notes: Mapped[str | None] = mapped_column(String, nullable=True)
-    tags: Mapped[str | None] = mapped_column(String, nullable=True)  # JSON stored as string
+    tags: Mapped[list[str] | None] = mapped_column(JSONListString, nullable=True)  # JSON stored as string, deserialized as list
     is_recurring: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     recurrence_type: Mapped[str | None] = mapped_column(String(20), nullable=True)  # monthly, weekly, yearly
     merchant_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     transaction_source: Mapped[str] = mapped_column(
         String(20), nullable=False, default="manual"
-    )  # manual, csv_import, bank_import, upi_import, ai_generated
+    )  # manual, csv_import, bank_import, upi_import, ai_generated, gmail
+    gmail_message_id: Mapped[str | None] = mapped_column(
+        String(100), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=_utcnow,

@@ -3,6 +3,7 @@ Portfolio service — business logic for holdings, watchlist, and portfolio metr
 """
 import json
 import uuid
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -125,7 +126,7 @@ class PortfolioService:
         print(f"[UPDATE HOLDING] SERVICE: Existing holding found: id={existing.id}, symbol={existing.symbol}")
 
         # Build update values dict
-        values: dict = {}
+        values: dict[str, Any] = {}
         if payload.symbol is not None:
             values["symbol"] = payload.symbol
         if payload.company_name is not None:
@@ -474,7 +475,7 @@ class PortfolioService:
         if not existing:
             raise NotFoundError("Watchlist item")
 
-        values: dict = {}
+        values: dict[str, Any] = {}
         if payload.symbol is not None:
             values["symbol"] = payload.symbol
         if payload.company_name is not None:

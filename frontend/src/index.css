@@ -276,6 +276,39 @@
   .fc-stat-icon {
     @apply w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 ease-out hover:scale-110;
   }
+
+  /* AI Assistant — inline markdown rendering */
+  .prose-finance {
+    @apply text-sm text-white/90 leading-relaxed;
+  }
+
+  .prose-finance p {
+    @apply mb-2;
+  }
+
+  .fc-code-block {
+    @apply block bg-surface-input border border-surface-border rounded-lg
+           px-3 py-2 mt-2 mb-2 text-xs text-brand-300 font-mono
+           overflow-x-auto whitespace-pre-wrap;
+  }
+
+  .fc-inline-code {
+    @apply bg-surface-input border border-surface-border rounded px-1 py-0.5
+           text-xs text-brand-300 font-mono;
+  }
+
+  .fc-md-ul {
+    @apply my-2 space-y-1 list-none pl-0;
+  }
+
+  .fc-md-li {
+    @apply flex items-start gap-2 text-sm text-white/80;
+  }
+
+  .fc-md-li::before {
+    content: '•';
+    @apply text-brand-400 shrink-0 mt-0.5;
+  }
 }
 
 @layer utilities {

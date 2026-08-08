@@ -164,6 +164,8 @@ class PortfolioRepository:
 
         print(f"[UPDATE HOLDING] REPOSITORY: Fetching updated holding from database")
         updated = await self.get_holding_by_id(holding_id, user_id)
+        if not updated:
+            raise ValueError("Holding not found after update")
         print(f"[UPDATE HOLDING] REPOSITORY: Fetched updated holding: id={updated.id}, symbol={updated.symbol}")
         print(f"[UPDATE HOLDING] REPOSITORY: Returning updated holding")
         return updated
@@ -392,6 +394,8 @@ class PortfolioRepository:
         await self.db.flush()
 
         updated = await self.get_watchlist_by_id(watchlist_id, user_id)
+        if not updated:
+            raise ValueError("Watchlist not found after update")
         return updated
 
     async def delete_watchlist(self, watchlist_id: uuid.UUID, user_id: str) -> None:

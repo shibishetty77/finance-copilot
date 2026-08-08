@@ -33,7 +33,7 @@ class TransactionBase(BaseModel):
             # Handle JSON string from database
             import json
             try:
-                return json.loads(v)
+                return json.loads(v)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 return [v]
         return None
@@ -66,7 +66,7 @@ class TransactionUpdate(BaseModel):
         if isinstance(v, str):
             import json
             try:
-                return json.loads(v)
+                return json.loads(v)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 return [v]
         return None

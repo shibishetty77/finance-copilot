@@ -3,6 +3,7 @@ Transaction service — business logic for transaction CRUD operations.
 """
 
 import uuid
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -103,7 +104,7 @@ class TransactionService:
             raise NotFoundError("Transaction")
 
         # Build update values dict
-        values: dict = {}
+        values: dict[str, Any] = {}
         if payload.description is not None:
             values["description"] = payload.description
         if payload.amount is not None:

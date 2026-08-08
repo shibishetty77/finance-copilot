@@ -1,14 +1,25 @@
 """
 SQLAlchemy ORM model for the users table.
 """
+from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+if TYPE_CHECKING:
+    from app.models.ai_settings import AISettings
+    from app.models.goal import Goal
+    from app.models.holding import Holding
+    from app.models.portfolio_snapshot import PortfolioSnapshot
+    from app.models.transaction import Transaction
+    from app.models.watchlist import Watchlist
+    from app.models.gmail_credential import GmailCredential
 
 
 def _utcnow() -> datetime:
@@ -52,6 +63,8 @@ class User(Base):
     watchlist: Mapped[list["Watchlist"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     portfolio_snapshots: Mapped[list["PortfolioSnapshot"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     goals: Mapped[list["Goal"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    ai_settings: Mapped["AISettings"] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
+    gmail_credential: Mapped["GmailCredential"] = relationship(back_populates="user", uselist=False, cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<User id={self.id} email={self.email}>"

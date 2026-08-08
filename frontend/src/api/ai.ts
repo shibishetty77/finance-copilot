@@ -7,6 +7,10 @@
  * Current endpoints:
  *   health()          → GET  /api/v1/ai/health   (public)
  *   generate()        → POST /api/v1/ai/generate (auth required)
+ *   getSettings()     → GET /api/v1/ai/settings (auth required)
+ *   updateSettings()  → PUT /api/v1/ai/settings (auth required)
+ *   testSettings()    → POST /api/v1/ai/test (auth required)
+ *   listModels()      → POST /api/v1/ai/models (auth required)
  *   parseTransaction() → POST /api/v1/ai/generate (auth required, Smart Entry)
  *
  * Future stubs (implemented when the features are built):
@@ -21,11 +25,34 @@ import type {
   AIHealthResponse,
   AIRequest,
   AIResponse,
-  ChatRequest,
-  ChatResponse,
   StructuredRequest,
   StructuredResponse,
+  AISettingsResponse,
+  UpdateAISettingsRequest,
+  TestAISettingsRequest,
+  TestAISettingsResponse,
+  ListModelsRequest,
+  ListModelsResponse,
+  AssistantChatRequest,
+  AssistantChatResponse,
+  AssistantHistoryResponse,
+  ClearHistoryResponse,
 } from '@/types/ai';
+
+export interface ParseSmsRequest {
+  message: string;
+}
+
+export interface ParsedSmsResponse {
+  description: string | null;
+  merchant_name: string | null;
+  amount: number | null;
+  transaction_type: string | null;
+  transaction_date: string | null;
+  category: string | null;
+  payment_method: string | null;
+  confidence: number;
+}
 
 /**
  * The single AI API client object.
@@ -65,19 +92,73 @@ export const aiApi = {
     return res.data;
   },
 
+  /**
+   * Get user's AI settings.
+   */
+  getSettings: async (): Promise<AISettingsResponse> => {
+    const res = await apiClient.get<AISettingsResponse>('/ai/settings');
+    return res.data;
+  },
+
+  /**
+   * Update user's AI settings.
+   */
+  updateSettings: async (request: UpdateAISettingsRequest): Promise<AISettingsResponse> => {
+    const res = await apiClient.put<AISettingsResponse>('/ai/settings', request);
+    return res.data;
+  },
+
+  /**
+   * Test AI settings.
+   */
+  testSettings: async (request: TestAISettingsRequest): Promise<TestAISettingsResponse> => {
+    const res = await apiClient.post<TestAISettingsResponse>('/ai/test', request);
+    return res.data;
+  },
+
+  /**
+   * List available models for a provider.
+   */
+  listModels: async (request: ListModelsRequest): Promise<ListModelsResponse> => {
+    const res = await apiClient.post<ListModelsResponse>('/ai/models', request);
+    return res.data;
+  },
+
   // ── Future stubs ───────────────────────────────────────────────────────────
   // These methods are declared here so all future imports target this file.
   // Implement them when the corresponding backend endpoints are built.
 
   /**
-   * @future AI Financial Assistant — multi-turn conversation.
-   * Endpoint: POST /api/v1/ai/assistant
+   * AI Finance Assistant — send a message and get a response.
+   *
+   * The backend builds financial context from the user's data,
+   * calls Ollama, persists the exchange, and returns the assistant's reply.
+   *
+   * Endpoint: POST /api/v1/ai/assistant/chat
    */
-  assistant: async (_request: ChatRequest): Promise<ChatResponse> => {
-    throw new Error(
-      'aiApi.assistant() is not yet implemented. ' +
-      'It will be available when the AI Assistant feature is built.'
-    );
+  assistant: async (request: AssistantChatRequest): Promise<AssistantChatResponse> => {
+    const res = await apiClient.post<AssistantChatResponse>('/ai/assistant/chat', request);
+    return res.data;
+  },
+
+  /**
+   * Load the full conversation history for the current user.
+   *
+   * Endpoint: GET /api/v1/ai/assistant/history
+   */
+  getHistory: async (): Promise<AssistantHistoryResponse> => {
+    const res = await apiClient.get<AssistantHistoryResponse>('/ai/assistant/history');
+    return res.data;
+  },
+
+  /**
+   * Clear all conversation history for the current user.
+   *
+   * Endpoint: DELETE /api/v1/ai/assistant/history
+   */
+  clearHistory: async (): Promise<ClearHistoryResponse> => {
+    const res = await apiClient.delete<ClearHistoryResponse>('/ai/assistant/history');
+    return res.data;
   },
 
   /**
@@ -95,30 +176,31 @@ export const aiApi = {
   },
 
   /**
-   * @future Receipt OCR — extract transaction data from a receipt image.
-   * Endpoint: POST /api/v1/ai/ocr
+   * Receipt OCR — implemented in @/api/ocr.ts (ocrApi.scanReceipt).
+   *
+   * The combined OCR + AI endpoint lives at POST /api/v1/ocr/receipt/parse.
+   * Use ocrApi.scanReceipt(formData) instead of this method.
+   *
+   * @deprecated Use ocrApi from '@/api/ocr' directly.
    */
   ocr: async (_request: StructuredRequest): Promise<StructuredResponse> => {
     throw new Error(
-      'aiApi.ocr() is not yet implemented. ' +
-      'It will be available when the Receipt OCR feature is built.'
+      'aiApi.ocr() is deprecated. Use ocrApi.scanReceipt() from @/api/ocr instead.'
     );
   },
 
   /**
-   * @future SMS Parsing — extract transaction from a bank SMS alert.
-   * Endpoint: POST /api/v1/ai/parse-sms
+   * SMS Parsing — extract transaction from a bank SMS alert.
+   * Endpoint: POST /api/v1/messages/parse
    */
-  parseSms: async (_request: AIRequest): Promise<StructuredResponse> => {
-    throw new Error(
-      'aiApi.parseSms() is not yet implemented. ' +
-      'It will be available when the SMS Parsing feature is built.'
-    );
+  parseSms: async (request: ParseSmsRequest): Promise<ParsedSmsResponse> => {
+    const res = await apiClient.post<ParsedSmsResponse>('/messages/parse', request);
+    return res.data;
   },
 
   /**
    * @future Statement Import — parse a bank statement into transactions.
-   * Endpoint: POST /api/v1/ai/parse-statement
+   * Endpoint: POST /api/v1/ai/parseStatement
    */
   parseStatement: async (_request: AIRequest): Promise<StructuredResponse> => {
     throw new Error(

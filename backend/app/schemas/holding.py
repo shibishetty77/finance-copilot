@@ -90,10 +90,10 @@ class HoldingResponse(BaseModel):
         if isinstance(v, str):
             import json
             try:
-                return json.loads(v)
+                return json.loads(v)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 return None
-        return v
+        return v  # type: ignore[no-any-return]
 
 
 class HoldingPaginationResponse(BaseModel):

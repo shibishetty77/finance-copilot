@@ -1,0 +1,7 @@
+=== USER FINANCIAL DATA ===
+
+[Aug 2026 Summary]
+  Income:   ₹0.00
+  Expenses: ₹0.00
+  Savings:  ₹0.00
+  Transactions: 0

@@ -15,6 +15,9 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
 
+__all__ = ["Base", "AsyncSession", "AsyncSessionLocal", "engine", "get_db"]
+
+
 # ── Declarative base ──────────────────────────────────────────────────────────
 class Base(DeclarativeBase):
     """All ORM models inherit from this base."""

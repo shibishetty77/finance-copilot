@@ -27,6 +27,7 @@ class Settings(BaseSettings):
 
     # ── Security ──────────────────────────────────────────────────────────────
     SECRET_KEY: str
+    ENCRYPTION_KEY: str | None = None
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -40,10 +41,20 @@ class Settings(BaseSettings):
 
     # ── AI ────────────────────────────────────────────────────────────────────
     # Provider selection — only this value needs changing to switch providers.
-    AI_PROVIDER: str = "gemini"  # gemini | openai | claude
+    AI_PROVIDER: str = "ollama"  # ollama | gemini | openai | claude
+
+    # ── Ollama (local) ────────────────────────────────────────────────────────
+    OLLAMA_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "llama3.2:3b"
+    OLLAMA_TIMEOUT: int = 60
+
+    # ── OCR ───────────────────────────────────────────────────────────────────
+    # Optional explicit path to the tesseract executable.
+    # If not provided, pytesseract will look for 'tesseract' on the system PATH.
+    TESSERACT_CMD: str | None = None
 
     # Model configuration
-    MODEL_NAME: str = "gemini-2.5-flash"
+    MODEL_NAME: str = "llama3.2:3b"
     TEMPERATURE: float = 0.2
     MAX_TOKENS: int = 2048
 
@@ -61,6 +72,11 @@ class Settings(BaseSettings):
     # ── Rate Limiting ─────────────────────────────────────────────────────────
     RATE_LIMIT_PER_MINUTE: int = 200
     AUTH_RATE_LIMIT_PER_MINUTE: int = 10
+
+    # ── Google OAuth ──────────────────────────────────────────────────────────
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = "http://localhost:5173/gmail-callback"
 
     @property
     def is_production(self) -> bool:

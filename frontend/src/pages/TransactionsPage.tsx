@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -28,6 +29,10 @@ import { KebabMenu } from '@/components/ui/KebabMenu';
 import { CategoryIcon } from '@/components/ui/CategoryIcon';
 import { TransactionHubModal } from '@/components/transactions/TransactionHubModal';
 import { AISmartEntryModal, type TransactionPrefill } from '@/components/transactions/AISmartEntryModal';
+import { ReceiptScanModal } from '@/components/transactions/ReceiptScanModal';
+import { BankStatementImportModal } from '@/components/statements/BankStatementImportModal';
+import { SmsImportModal } from '@/components/transactions/SmsImportModal';
+import { GmailImportModal } from '@/components/transactions/GmailImportModal';
 import { transactionsApi } from '@/api/transactions';
 import { formatCurrency, formatDate } from '@/utils/formatDate';
 import type { Transaction, TransactionCreate, TransactionUpdate } from '@/types/transaction';
@@ -86,6 +91,10 @@ export function TransactionsPage() {
   const [isTransactionHubOpen, setIsTransactionHubOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAISmartEntryOpen, setIsAISmartEntryOpen] = useState(false);
+  const [isReceiptScanOpen, setIsReceiptScanOpen] = useState(false);
+  const [isBankStatementImportOpen, setIsBankStatementImportOpen] = useState(false);
+  const [isSmsImportOpen, setIsSmsImportOpen] = useState(false);
+  const [isGmailImportOpen, setIsGmailImportOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -98,6 +107,16 @@ export function TransactionsPage() {
     page: 1,
     page_size: 20,
   });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle OAuth auto-open
+  useEffect(() => {
+    if (searchParams.get('action') === 'gmail-import') {
+      setIsGmailImportOpen(true);
+      // Remove query param without reloading
+      setSearchParams(new URLSearchParams());
+    }
+  }, [searchParams, setSearchParams]);
 
   // Fetch transactions
   const { data: transactionsData, isLoading } = useQuery({
@@ -219,13 +238,36 @@ export function TransactionsPage() {
     setIsAISmartEntryOpen(true);
   };
 
+  const handleReceiptScanOpen = () => {
+    setIsTransactionHubOpen(false);
+    setIsReceiptScanOpen(true);
+  };
+
+  const handleBankStatementImportOpen = () => {
+    setIsTransactionHubOpen(false);
+    setIsBankStatementImportOpen(true);
+  };
+
+  const handleSmsImportOpen = () => {
+    setIsTransactionHubOpen(false);
+    setIsSmsImportOpen(true);
+  };
+
+  const handleGmailImportOpen = () => {
+    setIsTransactionHubOpen(false);
+    setIsGmailImportOpen(true);
+  };
+
   /**
-   * Called when the user clicks Continue on the AI Review screen.
+   * Called when the user clicks Continue on the AI Review screen OR the
+   * Receipt OCR Review screen. Both use the same TransactionPrefill shape.
    * Pre-fills the existing Add Transaction form and opens it.
    * Zero form logic is duplicated here.
    */
   const handleAIContinue = (prefill: TransactionPrefill) => {
     setIsAISmartEntryOpen(false);
+    setIsReceiptScanOpen(false);
+    setIsSmsImportOpen(false);
     addForm.reset({
       description: prefill.description,
       amount: prefill.amount,
@@ -482,6 +524,10 @@ export function TransactionsPage() {
         onClose={() => setIsTransactionHubOpen(false)}
         onManualEntry={() => setIsAddModalOpen(true)}
         onAISmartEntry={handleAISmartEntryOpen}
+        onScanReceipt={handleReceiptScanOpen}
+        onBankStatementImport={handleBankStatementImportOpen}
+        onSmsImport={handleSmsImportOpen}
+        onGmailImport={handleGmailImportOpen}
       />
 
       {/* AI Smart Entry Modal */}
@@ -489,6 +535,42 @@ export function TransactionsPage() {
         open={isAISmartEntryOpen}
         onClose={() => setIsAISmartEntryOpen(false)}
         onContinue={handleAIContinue}
+      />
+
+      {/* Receipt Scan Modal */}
+      <ReceiptScanModal
+        open={isReceiptScanOpen}
+        onClose={() => setIsReceiptScanOpen(false)}
+        onContinue={handleAIContinue}
+      />
+
+      {/* Bank Statement Import Modal */}
+      <BankStatementImportModal
+        open={isBankStatementImportOpen}
+        onClose={() => setIsBankStatementImportOpen(false)}
+        onSuccess={() => {
+          setIsBankStatementImportOpen(false);
+          qc.invalidateQueries({ queryKey: ['transactions'] });
+          qc.invalidateQueries({ queryKey: ['transactions-summary'] });
+        }}
+      />
+
+      {/* SMS Import Modal */}
+      <SmsImportModal
+        open={isSmsImportOpen}
+        onClose={() => setIsSmsImportOpen(false)}
+        onContinue={handleAIContinue}
+      />
+
+      {/* Gmail Import Modal */}
+      <GmailImportModal
+        open={isGmailImportOpen}
+        onClose={() => setIsGmailImportOpen(false)}
+        onSuccess={() => {
+          setIsGmailImportOpen(false);
+          qc.invalidateQueries({ queryKey: ['transactions'] });
+          qc.invalidateQueries({ queryKey: ['transactions-summary'] });
+        }}
       />
     </div>
   );

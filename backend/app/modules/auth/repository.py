@@ -4,6 +4,7 @@ Follows the repository pattern: no business logic here.
 """
 
 import uuid
+from typing import Any
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,7 +56,7 @@ class UserRepository:
         full_name: str | None = None,
         phone: str | None = None,
     ) -> User | None:
-        values: dict = {}
+        values: dict[str, Any] = {}
         if full_name is not None:
             values["full_name"] = full_name.strip()
         if phone is not None:

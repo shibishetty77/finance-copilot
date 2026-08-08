@@ -10,6 +10,7 @@ import {
   Wallet,
   ChevronLeft,
   ChevronRight,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useUIStore } from '@/store/uiStore';
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { to: '/goals', icon: Target, label: 'Goals' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
   { to: '/ai-chat', icon: MessageSquareText, label: 'AI Assistant' },
+  { to: '/ai-settings', icon: Settings, label: 'AI Settings' },
 ];
 
 export function Sidebar() {

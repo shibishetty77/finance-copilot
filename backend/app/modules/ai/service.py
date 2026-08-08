@@ -43,7 +43,7 @@ _BASE_BACKOFF_SECONDS = 1.0   # doubles on each retry: 1s → 2s → 4s
 _CALL_TIMEOUT_SECONDS = 30.0  # per-call timeout (before retries)
 
 # Errors that are worth retrying
-_RETRYABLE_ERRORS = (AIProviderError, AITimeoutError)
+_RETRYABLE_ERRORS = (AIProviderError, AITimeoutError, AIInvalidResponseError)
 
 
 class AIService:
@@ -250,8 +250,9 @@ class AIService:
         """
         Call fn(*args) with exponential-backoff retries and a per-call timeout.
 
-        Retries on transient errors (AIProviderError, AITimeoutError).
-        Does NOT retry on AIRateLimitError or AIInvalidResponseError.
+        Retries on transient errors (AIProviderError, AITimeoutError) and 
+        stochastic generation errors (AIInvalidResponseError).
+        Does NOT retry on AIRateLimitError.
 
         Args:
             fn:    An async callable (provider method).
@@ -272,7 +273,7 @@ class AIService:
                 logger.warning("AI call timed out (attempt %d/%d)", attempt, _MAX_RETRIES)
             except AIRateLimitError:
                 raise  # Never retry rate limits
-            except _RETRYABLE_ERRORS as exc:  # type: ignore[misc]
+            except _RETRYABLE_ERRORS as exc:
                 last_exc = exc
                 logger.warning(
                     "AI call failed (attempt %d/%d): %s",
