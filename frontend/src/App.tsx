@@ -183,7 +183,7 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader size="lg" text="Loading Finance Copilot..." />
+        <Loader size="lg" text="Loading CortexFi..." />
       </div>
     );
   }

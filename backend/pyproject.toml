@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "finance-copilot-backend"
+name = "cortexfi-backend"
 version = "0.1.0"
-description = "Finance Copilot – FastAPI Backend"
+description = "CortexFi – FastAPI Backend"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.111.0",
@@ -14,7 +14,7 @@ dependencies = [
     "asyncpg>=0.29.0",
     "alembic>=1.13.1",
     "pydantic>=2.7.0",
-    "pydantic-settings>=2.3.0",
+    "pydantic-settings>=2.14.2",
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
     "python-multipart>=0.0.9",
@@ -23,7 +23,7 @@ dependencies = [
     "email-validator>=2.1.1",
     "google-generativeai>=0.8.0",
     "pytesseract>=0.3.10",
-    "Pillow>=10.0.0",
+    "Pillow>=12.3.0",
     "openai>=1.0.0",
     "anthropic>=0.30.0",
     "beautifulsoup4>=4.12.3",

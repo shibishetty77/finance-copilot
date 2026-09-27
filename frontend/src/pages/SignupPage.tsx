@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Mail, Lock, User, Phone, IndianRupee } from 'lucide-react';
+import { Mail, Lock, User, Phone } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
@@ -104,10 +104,10 @@ export function SignupPage() {
         {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
           <Link to="/login" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center">
-              <IndianRupee className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-sm">
+              C
             </div>
-            <span className="font-bold text-white">Finance <span className="text-gradient">Copilot</span></span>
+            <span className="font-bold text-white text-lg">Cortex<span className="text-gradient">Fi</span></span>
           </Link>
         </div>
 

@@ -1,7 +1,7 @@
 """
 SQLAlchemy ORM model for the chat_messages table.
 
-Stores conversation history for the AI Finance Assistant.
+Stores conversation history for Cortex.
 Each row is one message (user or assistant) in a conversation.
 """
 

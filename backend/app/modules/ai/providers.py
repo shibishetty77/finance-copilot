@@ -120,7 +120,7 @@ class AIProvider(ABC):
 class GeminiProvider(AIProvider):
     """
     Google Gemini provider using the google-generativeai SDK.
-    Can be used for both Finance Copilot Cloud (with system key) and BYO mode.
+    Can be used for both CortexFi Cloud (with system key) and BYO mode.
     """
 
     def __init__(

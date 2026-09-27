@@ -1,8 +1,8 @@
 """
-Market Data Tools — Finance Copilot.
+Market Data Tools — CortexFi.
 
-Encapsulates all yfinance interactions. The LLM never calls yfinance directly;
-it routes through this service via the context engine.
+Encapsulates all yfinance interactions and real-time API integrations.
+The LLM never calls these APIs directly; it routes through this service via the context engine.
 
 Public interface:
     resolve_ticker(query)               → str | None
@@ -10,9 +10,10 @@ Public interface:
     get_historical_performance(ticker, period) → dict
     compare_securities(ticker1, ticker2, period) → dict
     get_company_info(ticker)            → dict
+    get_commodity_price(commodity)      → dict (with real API integration)
 
-Architecture rule: yfinance is ONLY imported here. No other module in the AI
-pipeline may import yfinance.
+Architecture rule: yfinance and market APIs are ONLY imported here. No other module in the AI
+pipeline may import these directly.
 """
 
 from __future__ import annotations
@@ -27,13 +28,13 @@ logger = logging.getLogger(__name__)
 
 # ── Simple in-process TTL cache ───────────────────────────────────────────────
 
-_CACHE: dict[str, tuple[float, Any]] = {}
+_CACHE: dict[str, tuple[float, dict[str, Any]]] = {}
 _QUOTE_TTL = 300        # 5 minutes for quotes
 _HISTORY_TTL = 3600     # 1 hour for historical data
 _INFO_TTL = 3600        # 1 hour for company info
 
 
-def _cache_get(key: str) -> Any | None:
+def _cache_get(key: str) -> dict[str, Any] | None:
     entry = _CACHE.get(key)
     if entry is None:
         return None
@@ -44,12 +45,12 @@ def _cache_get(key: str) -> Any | None:
     return None
 
 
-def _cache_set(key: str, value: Any, ttl: float) -> None:
+def _cache_set(key: str, value: dict[str, Any], ttl: float) -> None:
     # Store value with expiry — on next get we compare monotonic time
     _CACHE[key] = (time.monotonic() + ttl, value)
 
 
-def _cache_fetch(key: str) -> Any | None:
+def _cache_fetch(key: str) -> dict[str, Any] | None:
     """Return cached value if not yet expired."""
     entry = _CACHE.get(key)
     if entry is None:
@@ -192,7 +193,7 @@ def _now_iso() -> str:
 
 # ── Public tools ──────────────────────────────────────────────────────────────
 
-def get_quote(ticker: str) -> dict[str, Any]:
+def get_quote(ticker: str, retry: bool = True) -> dict[str, Any]:
     """
     Fetch the most recent available price quote for a ticker.
 
@@ -203,66 +204,70 @@ def get_quote(ticker: str) -> dict[str, Any]:
     if cached is not None:
         return cached
 
-    try:
-        import yfinance as yf  # Only imported inside this module
+    for attempt in range(2 if retry else 1):
+        try:
+            import yfinance as yf  # Only imported inside this module
 
-        t = yf.Ticker(ticker)
-        info = t.info or {}
+            t = yf.Ticker(ticker)
+            info = t.info or {}
 
-        # Primary price sources
-        price = (
-            _safe_float(info.get("currentPrice"))
-            or _safe_float(info.get("regularMarketPrice"))
-            or _safe_float(info.get("ask"))
-        )
-        prev_close = _safe_float(info.get("previousClose")) or _safe_float(
-            info.get("regularMarketPreviousClose")
-        )
+            # Primary price sources
+            price = (
+                _safe_float(info.get("currentPrice"))
+                or _safe_float(info.get("regularMarketPrice"))
+                or _safe_float(info.get("ask"))
+            )
+            prev_close = _safe_float(info.get("previousClose")) or _safe_float(
+                info.get("regularMarketPreviousClose")
+            )
 
-        day_change = None
-        day_change_pct = None
-        if price is not None and prev_close is not None and prev_close != 0:
-            day_change = round(price - prev_close, 2)
-            day_change_pct = round((day_change / prev_close) * 100, 2)
+            day_change = None
+            day_change_pct = None
+            if price is not None and prev_close is not None and prev_close != 0:
+                day_change = round(price - prev_close, 2)
+                day_change_pct = round((day_change / prev_close) * 100, 2)
 
-        result: dict[str, Any] = {
-            "symbol": ticker,
-            "company_name": _safe_str(info.get("longName") or info.get("shortName")),
-            "price": price,
-            "previous_close": prev_close,
-            "day_change": day_change,
-            "day_change_percent": day_change_pct,
-            "currency": _safe_str(info.get("currency")),
-            "exchange": _safe_str(info.get("exchange") or info.get("fullExchangeName")),
-            "market_state": _safe_str(info.get("marketState")),
-            "data_timestamp": _now_iso(),
-            "error": None,
-        }
+            result: dict[str, Any] = {
+                "symbol": ticker,
+                "company_name": _safe_str(info.get("longName") or info.get("shortName")),
+                "price": price,
+                "previous_close": prev_close,
+                "day_change": day_change,
+                "day_change_percent": day_change_pct,
+                "currency": _safe_str(info.get("currency")),
+                "exchange": _safe_str(info.get("exchange") or info.get("fullExchangeName")),
+                "market_state": _safe_str(info.get("marketState")),
+                "data_timestamp": _now_iso(),
+                "error": None,
+            }
 
-        if price is None:
-            result["error"] = f"No price data available for {ticker}"
+            if price is None:
+                result["error"] = f"No price data available for {ticker}"
 
-        _cache_set(cache_key, result, _QUOTE_TTL)
-        return result
+            _cache_set(cache_key, result, _QUOTE_TTL)
+            return result
 
-    except Exception as exc:
-        logger.warning("get_quote failed for %s: %s", ticker, exc)
-        return {
-            "symbol": ticker,
-            "company_name": None,
-            "price": None,
-            "previous_close": None,
-            "day_change": None,
-            "day_change_percent": None,
-            "currency": None,
-            "exchange": None,
-            "market_state": None,
-            "data_timestamp": _now_iso(),
-            "error": f"Could not retrieve market data for {ticker}: {exc}",
-        }
+        except Exception as exc:
+            if attempt == 0 and retry:
+                logger.warning("get_quote failed for %s (attempt 1), retrying: %s", ticker, exc)
+                continue
+            logger.warning("get_quote failed for %s: %s", ticker, exc)
+            return {
+                "symbol": ticker,
+                "company_name": None,
+                "price": None,
+                "previous_close": None,
+                "day_change": None,
+                "day_change_percent": None,
+                "currency": None,
+                "exchange": None,
+                "market_state": None,
+                "data_timestamp": _now_iso(),
+                "error": f"Could not retrieve market data for {ticker}: {exc}",
+            }
 
 
-def get_historical_performance(ticker: str, period: str = "1y") -> dict[str, Any]:
+def get_historical_performance(ticker: str, period: str = "1y", retry: bool = True) -> dict[str, Any]:
     """
     Fetch historical OHLCV data and compute start/end price, return %, high, low.
 
@@ -277,14 +282,62 @@ def get_historical_performance(ticker: str, period: str = "1y") -> dict[str, Any
     if cached is not None:
         return cached
 
-    try:
-        import yfinance as yf
+    for attempt in range(2 if retry else 1):
+        try:
+            import yfinance as yf
 
-        t = yf.Ticker(ticker)
-        hist = t.history(period=period)
+            t = yf.Ticker(ticker)
+            hist = t.history(period=period)
 
-        if hist is None or hist.empty:
+            if hist is None or hist.empty:
+                result = {
+                    "symbol": ticker,
+                    "period": period,
+                    "start_price": None,
+                    "end_price": None,
+                    "return_percent": None,
+                    "high": None,
+                    "low": None,
+                    "start_date": None,
+                    "end_date": None,
+                    "currency": None,
+                    "data_timestamp": _now_iso(),
+                    "error": f"No historical data available for {ticker} over {period}",
+                }
+                _cache_set(cache_key, result, _HISTORY_TTL)
+                return result
+
+            close = hist["Close"]
+            start_price = _safe_float(close.iloc[0])
+            end_price = _safe_float(close.iloc[-1])
+            return_pct = None
+            if start_price and end_price and start_price != 0:
+                return_pct = round(((end_price - start_price) / start_price) * 100, 2)
+
             result = {
+                "symbol": ticker,
+                "period": period,
+                "start_price": round(start_price, 2) if start_price else None,
+                "end_price": round(end_price, 2) if end_price else None,
+                "return_percent": return_pct,
+                "high": round(float(hist["High"].max()), 2),
+                "low": round(float(hist["Low"].min()), 2),
+                "start_date": str(hist.index[0].date()),
+                "end_date": str(hist.index[-1].date()),
+                "currency": None,  # fetched separately if needed
+                "data_timestamp": _now_iso(),
+                "error": None,
+            }
+
+            _cache_set(cache_key, result, _HISTORY_TTL)
+            return result
+
+        except Exception as exc:
+            if attempt == 0 and retry:
+                logger.warning("get_historical_performance failed for %s (attempt 1), retrying: %s", ticker, exc)
+                continue
+            logger.warning("get_historical_performance failed for %s: %s", ticker, exc)
+            return {
                 "symbol": ticker,
                 "period": period,
                 "start_price": None,
@@ -296,52 +349,8 @@ def get_historical_performance(ticker: str, period: str = "1y") -> dict[str, Any
                 "end_date": None,
                 "currency": None,
                 "data_timestamp": _now_iso(),
-                "error": f"No historical data available for {ticker} over {period}",
+                "error": f"Could not retrieve historical data for {ticker}: {exc}",
             }
-            _cache_set(cache_key, result, _HISTORY_TTL)
-            return result
-
-        close = hist["Close"]
-        start_price = _safe_float(close.iloc[0])
-        end_price = _safe_float(close.iloc[-1])
-        return_pct = None
-        if start_price and end_price and start_price != 0:
-            return_pct = round(((end_price - start_price) / start_price) * 100, 2)
-
-        result = {
-            "symbol": ticker,
-            "period": period,
-            "start_price": round(start_price, 2) if start_price else None,
-            "end_price": round(end_price, 2) if end_price else None,
-            "return_percent": return_pct,
-            "high": round(float(hist["High"].max()), 2),
-            "low": round(float(hist["Low"].min()), 2),
-            "start_date": str(hist.index[0].date()),
-            "end_date": str(hist.index[-1].date()),
-            "currency": None,  # fetched separately if needed
-            "data_timestamp": _now_iso(),
-            "error": None,
-        }
-
-        _cache_set(cache_key, result, _HISTORY_TTL)
-        return result
-
-    except Exception as exc:
-        logger.warning("get_historical_performance failed for %s: %s", ticker, exc)
-        return {
-            "symbol": ticker,
-            "period": period,
-            "start_price": None,
-            "end_price": None,
-            "return_percent": None,
-            "high": None,
-            "low": None,
-            "start_date": None,
-            "end_date": None,
-            "currency": None,
-            "data_timestamp": _now_iso(),
-            "error": f"Could not retrieve historical data for {ticker}: {exc}",
-        }
 
 
 def compare_securities(ticker1: str, ticker2: str, period: str = "1y") -> dict[str, Any]:
@@ -455,3 +464,275 @@ def get_company_info(ticker: str) -> dict[str, Any]:
             "data_timestamp": _now_iso(),
             "error": f"Could not retrieve company info for {ticker}: {exc}",
         }
+
+
+def get_company_performance(ticker: str) -> dict[str, Any]:
+    """
+    Fetch a comprehensive performance summary aggregating quote, multiple historical periods, and company info.
+    """
+    quote = get_quote(ticker)
+    if quote.get("error"):
+        return {"symbol": ticker, "error": quote["error"], "data_timestamp": _now_iso()}
+        
+    info = get_company_info(ticker)
+    hist_1m = get_historical_performance(ticker, "1mo")
+    hist_6m = get_historical_performance(ticker, "6mo")
+    hist_1y = get_historical_performance(ticker, "1y")
+    
+    return {
+        "symbol": ticker,
+        "company_name": info.get("company_name") or quote.get("company_name"),
+        "latest_price": quote.get("price"),
+        "currency": quote.get("currency"),
+        "previous_close": quote.get("previous_close"),
+        "return_1m": hist_1m.get("return_percent"),
+        "return_6m": hist_6m.get("return_percent"),
+        "return_1y": hist_1y.get("return_percent"),
+        "week_52_high": info.get("52w_high"),
+        "week_52_low": info.get("52w_low"),
+        "market_cap": info.get("market_cap"),
+        "pe_ratio": info.get("pe_ratio"),
+        "dividend_yield": info.get("dividend_yield"),
+        "sector": info.get("sector"),
+        "industry": info.get("industry"),
+        "data_timestamp": _now_iso(),
+        "source": "yfinance",
+        "error": None
+    }
+
+
+def screen_stocks(max_price: float | None, period: str = "1y") -> dict[str, Any]:
+    """
+    Screen stocks from the known universe based on max price and sort by performance.
+    """
+    results = []
+    
+    # Iterate over unique tickers
+    tickers = list(set(_INDIA_TICKER_MAP.values()))
+    tickers.sort()  # Sort for determinism
+    
+    for ticker in tickers:
+        quote = get_quote(ticker)
+        if quote.get("error") or quote.get("price") is None:
+            continue
+            
+        price = quote["price"]
+        
+        # Filter by price
+        if max_price is not None and price > max_price:
+            continue
+            
+        hist = get_historical_performance(ticker, period)
+        if hist.get("error") or hist.get("return_percent") is None:
+            continue
+            
+        results.append({
+            "symbol": ticker,
+            "company_name": quote["company_name"],
+            "price": price,
+            "currency": quote.get("currency") or "INR",
+            "return_percent": hist["return_percent"],
+            "performance_period": period,
+            "data_date": quote["data_timestamp"]
+        })
+        
+    # Rank by performance (highest return first)
+    results.sort(key=lambda x: x["return_percent"], reverse=True)
+    
+    # Limit to top 5 to avoid overwhelming context
+    top_results = results[:5]
+    
+    return {
+        "query": {
+            "market": "India",
+            "max_share_price": max_price,
+            "performance_period": period
+        },
+        "results": top_results,
+        "source": "yfinance"
+    }
+
+
+# ── Commodity Data ────────────────────────────────────────────────────────────
+
+# Commodity name → Yahoo Finance ticker mapping
+_COMMODITY_TICKER_MAP: dict[str, str] = {
+    "gold": "GC=F",  # Gold Futures
+    "silver": "SI=F",  # Silver Futures
+    "crude oil": "CL=F",  # Crude Oil Futures
+    "natural gas": "NG=F",  # Natural Gas Futures
+    "copper": "HG=F",  # Copper Futures
+    "platinum": "PL=F",  # Platinum Futures
+    "palladium": "PA=F",  # Palladium Futures
+    # Alternative ETF representations
+    "gold etf": "GLD",
+    "silver etf": "SLV",
+    "oil etf": "USO",
+}
+
+
+def resolve_commodity(query: str) -> str | None:
+    """
+    Resolve a commodity name to a Yahoo Finance ticker.
+    """
+    normalized = query.strip().lower()
+    if normalized in _COMMODITY_TICKER_MAP:
+        return _COMMODITY_TICKER_MAP[normalized]
+    
+    # Try partial match
+    for name, ticker in _COMMODITY_TICKER_MAP.items():
+        if normalized in name or name in normalized:
+            return ticker
+    
+    return None
+
+
+async def get_commodity_price(commodity: str, retry: bool = True) -> dict[str, Any]:
+    """
+    Fetch the current price of a commodity using real-time APIs.
+    
+    This function now uses the market_apis service for real-time data,
+    falling back to yfinance if the API service is unavailable.
+    
+    Args:
+        commodity: Commodity name (e.g., "gold", "silver", "crude oil")
+        
+    Returns:
+        Dict with price information including current price, unit, source, and timestamp.
+    """
+    # Try to use real-time API first
+    try:
+        from app.modules.ai.tools.market_apis import get_market_service
+        
+        market_service = get_market_service()
+        
+        # Map commodity names to API symbols
+        commodity_map = {
+            "gold": "GOLD",
+            "silver": "SILVER", 
+            "crude oil": "CRUDE",
+            "natural gas": "NATURAL_GAS",
+            "copper": "COPPER",
+        }
+        
+        api_symbol = commodity_map.get(commodity.lower())
+        if api_symbol:
+            data = await market_service.get_commodity_price(api_symbol)
+            
+            if data.get("available"):
+                # Normalize response format
+                return {
+                    "commodity": commodity,
+                    "symbol": data.get("symbol"),
+                    "price": data.get("price"),
+                    "unit": "troy oz" if commodity.lower() in ["gold", "silver"] else "unit",
+                    "currency": data.get("currency"),
+                    "source": data.get("source"),
+                    "data_timestamp": data.get("updated_at"),
+                    "available": True,
+                    "error": None,
+                }
+    except Exception as exc:
+        logger.warning("Failed to fetch commodity data from API: %s", exc)
+    
+    # Fallback to yfinance if API fails
+    ticker = resolve_commodity(commodity)
+    if not ticker:
+        return {
+            "commodity": commodity,
+            "price": None,
+            "unit": None,
+            "change": None,
+            "change_percent": None,
+            "currency": None,
+            "data_timestamp": _now_iso(),
+            "source": "yfinance (fallback)",
+            "available": False,
+            "error": f"Commodity '{commodity}' not recognized. Available: gold, silver, crude oil, natural gas, copper, platinum, palladium"
+        }
+    
+    cache_key = f"commodity:{ticker}"
+    cached = _cache_fetch(cache_key)
+    if cached is not None:
+        cached["source"] = "yfinance (cached)"
+        return cached
+    
+    for attempt in range(2 if retry else 1):
+        try:
+            import yfinance as yf
+            
+            t = yf.Ticker(ticker)
+            info = t.info or {}
+            
+            # Primary price sources
+            price = (
+                _safe_float(info.get("currentPrice"))
+                or _safe_float(info.get("regularMarketPrice"))
+                or _safe_float(info.get("ask"))
+            )
+            prev_close = _safe_float(info.get("previousClose")) or _safe_float(
+                info.get("regularMarketPreviousClose")
+            )
+            
+            day_change = None
+            day_change_pct = None
+            if price is not None and prev_close is not None and prev_close != 0:
+                day_change = round(price - prev_close, 2)
+                day_change_pct = round((day_change / prev_close) * 100, 2)
+            
+            # Determine unit based on commodity
+            unit_map = {
+                "GC=F": "troy oz",
+                "SI=F": "troy oz",
+                "CL=F": "barrel",
+                "NG=F": "MMBtu",
+                "HG=F": "pound",
+                "PL=F": "troy oz",
+                "PA=F": "troy oz",
+                "GLD": "share",
+                "SLV": "share",
+                "USO": "share",
+            }
+            unit = unit_map.get(ticker, "unit")
+            
+            result: dict[str, Any] = {
+                "commodity": commodity,
+                "symbol": ticker,
+                "price": price,
+                "unit": unit,
+                "previous_close": prev_close,
+                "day_change": day_change,
+                "day_change_percent": day_change_pct,
+                "currency": _safe_str(info.get("currency")) or "USD",
+                "exchange": _safe_str(info.get("exchange") or info.get("fullExchangeName")),
+                "market_state": _safe_str(info.get("marketState")),
+                "data_timestamp": _now_iso(),
+                "source": "yfinance (fallback)",
+                "available": price is not None,
+                "error": None if price else f"No price data available for {commodity}",
+            }
+            
+            _cache_set(cache_key, result, _QUOTE_TTL)
+            return result
+            
+        except Exception as exc:
+            if attempt == 0 and retry:
+                logger.warning("get_commodity_price failed for %s (attempt 1), retrying: %s", commodity, exc)
+                continue
+            logger.warning("get_commodity_price failed for %s: %s", commodity, exc)
+            return {
+                "commodity": commodity,
+                "symbol": ticker,
+                "price": None,
+                "unit": None,
+                "previous_close": None,
+                "day_change": None,
+                "day_change_percent": None,
+                "currency": None,
+                "exchange": None,
+                "market_state": None,
+                "data_timestamp": _now_iso(),
+                "source": "yfinance (error)",
+                "available": False,
+                "error": f"Could not retrieve commodity data for {commodity}: {exc}",
+            }

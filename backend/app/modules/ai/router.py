@@ -10,7 +10,7 @@ Endpoints:
   PUT    /api/v1/ai/settings            — Auth required. Update user's AI settings.
   POST   /api/v1/ai/test                — Auth required. Test AI settings.
   POST   /api/v1/ai/models              — Auth required. List available models.
-  POST   /api/v1/ai/assistant/chat      — Auth required. AI Finance Assistant chat.
+  POST   /api/v1/ai/assistant/chat      — Auth required. Cortex AI chat.
   GET    /api/v1/ai/assistant/history   — Auth required. Load conversation history.
   DELETE /api/v1/ai/assistant/history   — Auth required. Clear conversation history.
 
@@ -361,13 +361,13 @@ async def ai_generate(
 from pydantic import BaseModel as _BaseModel
 
 class AssistantChatRequest(_BaseModel):
-    """Request body for the AI Finance Assistant chat endpoint."""
+    """Request body for Cortex chat endpoint."""
     message: str
     conversation_id: str | None = None
 
 
 class AssistantChatResponse(_BaseModel):
-    """Response from the AI Finance Assistant."""
+    """Response from Cortex."""
     response: str
     conversation_id: str
     latency_ms: float
@@ -421,7 +421,7 @@ async def _get_provider_for_user(
     "/assistant/chat",
     response_model=AssistantChatResponse,
     status_code=status.HTTP_200_OK,
-    summary="AI Finance Assistant — send a message",
+    summary="Cortex — send a message",
     description=(
         "Send a natural-language question about your finances. "
         "The assistant queries only the relevant data and answers using your real figures."
@@ -433,7 +433,7 @@ async def assistant_chat(
     db: AsyncSession = Depends(get_db),
 ) -> AssistantChatResponse:
     """
-    Process one user message through the AI Finance Assistant.
+    Process one user message through Cortex.
 
     The assistant:
       1. Fetches relevant financial data (spending, categories, goals, etc.)
@@ -465,7 +465,7 @@ async def assistant_chat(
     "/assistant/history",
     response_model=AssistantHistoryResponse,
     status_code=status.HTTP_200_OK,
-    summary="AI Finance Assistant — load conversation history",
+    summary="Cortex — load conversation history",
     description="Return the full conversation history for the current user.",
 )
 async def get_assistant_history(
@@ -489,7 +489,7 @@ async def get_assistant_history(
     "/assistant/history",
     response_model=ClearHistoryResponse,
     status_code=status.HTTP_200_OK,
-    summary="AI Finance Assistant — clear conversation history",
+    summary="Cortex — clear conversation history",
     description="Delete all chat messages for the current user.",
 )
 async def clear_assistant_history(

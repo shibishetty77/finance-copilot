@@ -1,5 +1,5 @@
 /**
- * ReceiptScanModal — Finance Copilot Receipt OCR (Phase 3).
+ * ReceiptScanModal — CortexFi Receipt OCR (Phase 3).
  *
  * Manages five internal states:
  *   1. "upload"      — drag-and-drop / browse files zone with image preview
@@ -399,7 +399,7 @@ export function ReceiptScanModal({ open, onClose, onContinue }: ReceiptScanModal
             </div>
             <h2 className="text-xl font-bold text-white tracking-tight">Scan Receipt</h2>
             <p className="text-sm text-white/50 max-w-sm mx-auto leading-relaxed">
-              Upload a receipt image and Finance Copilot will automatically extract the transaction.
+              Upload a receipt image and Cortex will automatically extract the transaction.
             </p>
           </div>
 
@@ -531,7 +531,7 @@ export function ReceiptScanModal({ open, onClose, onContinue }: ReceiptScanModal
               <Loader2 className="w-7 h-7 text-brand-400 animate-spin" />
             </div>
             <h2 className="text-lg font-bold text-white">Reading your receipt…</h2>
-            <p className="text-sm text-white/40">Finance Copilot is extracting the transaction details</p>
+            <p className="text-sm text-white/40">Cortex is extracting the transaction details</p>
           </div>
 
           {/* Receipt thumbnail */}
@@ -793,7 +793,7 @@ export function ReceiptScanModal({ open, onClose, onContinue }: ReceiptScanModal
               Couldn't structure this receipt.
             </h2>
             <p className="text-sm text-white/40 max-w-sm mx-auto leading-relaxed">
-              {aiErrorMessage || 'Finance Copilot was unable to extract transaction details. Please try again.'}
+              {aiErrorMessage || 'Cortex was unable to extract transaction details. Please try again.'}
             </p>
           </div>
 

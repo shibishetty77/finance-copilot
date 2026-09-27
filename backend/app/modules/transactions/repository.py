@@ -162,10 +162,12 @@ class TransactionRepository:
 
     async def get_monthly_summary(self, user_id: str) -> list[dict[str, Any]]:
         """Get monthly income, expenses, and savings summary."""
-        # Use strftime for SQLite date formatting (works with both SQLite and PostgreSQL)
+        # Use extract for year and month, then format in Python
+        from sqlalchemy import extract
         query = (
             select(
-                func.strftime("%Y-%m", Transaction.transaction_date).label("month"),
+                extract("year", Transaction.transaction_date).label("year"),
+                extract("month", Transaction.transaction_date).label("month"),
                 func.sum(
                     case(
                         (Transaction.type == "income", Transaction.amount),
@@ -180,8 +182,14 @@ class TransactionRepository:
                 ).label("expenses"),
             )
             .where(Transaction.user_id == user_id)
-            .group_by(func.strftime("%Y-%m", Transaction.transaction_date))
-            .order_by(func.strftime("%Y-%m", Transaction.transaction_date).desc())
+            .group_by(
+                extract("year", Transaction.transaction_date),
+                extract("month", Transaction.transaction_date)
+            )
+            .order_by(
+                extract("year", Transaction.transaction_date).desc(),
+                extract("month", Transaction.transaction_date).desc()
+            )
         )
 
         result = await self.db.execute(query)
@@ -191,9 +199,11 @@ class TransactionRepository:
         for row in rows:
             income = float(row.income or 0)
             expenses = float(row.expenses or 0)
+            # Format month as YYYY-MM
+            month_str = f"{int(row.year)}-{int(row.month):02d}"
             summaries.append(
                 {
-                    "month": row.month,
+                    "month": month_str,
                     "income": income,
                     "expenses": expenses,
                     "savings": income - expenses,

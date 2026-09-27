@@ -31,7 +31,7 @@ export function StatCard({
       style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
     >
       <CardHeader className="mb-3">
-        <p className="text-xs font-medium text-white/50 uppercase tracking-wide">{label}</p>
+        <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{label}</p>
         <div
           className={cn(
             'w-9 h-9 rounded-xl flex items-center justify-center shadow-sm',
@@ -41,10 +41,10 @@ export function StatCard({
           <Icon className="w-[18px] h-[18px] text-white" strokeWidth={2} />
         </div>
       </CardHeader>
-      <div className="text-2xl font-bold text-white tabular-nums tracking-tight mt-auto">
+      <div className="text-2xl font-bold tabular-nums tracking-tight mt-auto" style={{ color: 'var(--text-primary)' }}>
         {value}
       </div>
-      {helperText && <p className="mt-2 text-xs text-white/40">{helperText}</p>}
+      {helperText && <p className="mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>{helperText}</p>}
       {trend !== undefined && (
         <div
           className={cn(

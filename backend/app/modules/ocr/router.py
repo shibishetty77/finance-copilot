@@ -287,7 +287,7 @@ async def ocr_receipt_parse(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail={
                 "code": "ai_error",
-                "message": "Finance Copilot could not structure the receipt data. Please try again.",
+                "message": "Cortex could not structure the receipt data. Please try again.",
             },
         )
 

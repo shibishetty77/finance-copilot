@@ -72,7 +72,7 @@ function SummaryCard({
       <CardHeader>
         <p className="fc-label">{label}</p>
         <div className={`fc-stat-icon ${color}`}>
-          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+          <Icon className="w-[18px] h-[18px]" strokeWidth={2} />
         </div>
       </CardHeader>
       <div className="fc-stat-value">{value}</div>
@@ -142,6 +142,8 @@ export function TransactionsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] });
       qc.invalidateQueries({ queryKey: ['transactions-summary'] });
+      qc.invalidateQueries({ queryKey: ['portfolio-summary'] });
+      qc.invalidateQueries({ queryKey: ['holdings'] });
       setIsAddModalOpen(false);
       addForm.reset();
     },
@@ -154,6 +156,8 @@ export function TransactionsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] });
       qc.invalidateQueries({ queryKey: ['transactions-summary'] });
+      qc.invalidateQueries({ queryKey: ['portfolio-summary'] });
+      qc.invalidateQueries({ queryKey: ['holdings'] });
       setIsEditModalOpen(false);
       setSelectedTransaction(null);
       editForm.reset();
@@ -166,6 +170,8 @@ export function TransactionsPage() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] });
       qc.invalidateQueries({ queryKey: ['transactions-summary'] });
+      qc.invalidateQueries({ queryKey: ['portfolio-summary'] });
+      qc.invalidateQueries({ queryKey: ['holdings'] });
       setIsDeleteModalOpen(false);
       setSelectedTransaction(null);
     },
@@ -307,25 +313,25 @@ export function TransactionsPage() {
           label="Total Income"
           value={formatCurrency(currentMonthData.income)}
           icon={IndianRupee}
-          color="bg-income/80"
+          color="fc-icon-income"
         />
         <SummaryCard
           label="Total Expenses"
           value={formatCurrency(currentMonthData.expenses)}
           icon={TrendingUp}
-          color="bg-expense/80"
+          color="fc-icon-expense"
         />
         <SummaryCard
           label="Savings"
           value={formatCurrency(currentMonthData.savings)}
           icon={IndianRupee}
-          color="bg-purple-600"
+          color="fc-icon-neutral"
         />
         <SummaryCard
           label="Savings Rate"
           value={`${savingsRate}%`}
           icon={TrendingUp}
-          color="bg-brand-600"
+          color="fc-icon-brand"
         />
       </div>
 
@@ -333,7 +339,7 @@ export function TransactionsPage() {
       <Card className="fc-card">
         <CardHeader>
           <CardTitle>Filters</CardTitle>
-          <Filter className="w-4 h-4 text-white/40" strokeWidth={2} />
+          <Filter className="w-4 h-4" style={{ color: 'var(--text-muted)' }} strokeWidth={2} />
         </CardHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Input
@@ -370,7 +376,7 @@ export function TransactionsPage() {
       <Card className="fc-card">
         <CardHeader>
           <CardTitle>Transactions</CardTitle>
-          <span className="text-xs text-white/40">
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
             {transactionsData?.total || 0} transactions
           </span>
         </CardHeader>
@@ -400,10 +406,10 @@ export function TransactionsPage() {
                   transactionType={transaction.type}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                     {transaction.description || transaction.merchant_name || 'Transaction'}
                   </p>
-                  <p className="text-xs text-white/50">
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     {formatDate(transaction.transaction_date)}
                     {(() => {
                       const catName = transaction.category?.name || getCategoryById(transaction.category_id)?.name;
@@ -431,14 +437,14 @@ export function TransactionsPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-white/50">No transactions found</p>
+            <p className="text-center py-12" style={{ color: 'var(--text-muted)' }}>No transactions found</p>
           </div>
         )}
 
         {/* Pagination */}
         {transactionsData && transactionsData.total_pages > 1 && (
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-surface-border">
-            <p className="text-xs text-white/50">
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
               Page {transactionsData.page} of {transactionsData.total_pages}
             </p>
             <div className="flex gap-2">
@@ -552,6 +558,8 @@ export function TransactionsPage() {
           setIsBankStatementImportOpen(false);
           qc.invalidateQueries({ queryKey: ['transactions'] });
           qc.invalidateQueries({ queryKey: ['transactions-summary'] });
+          qc.invalidateQueries({ queryKey: ['portfolio-summary'] });
+          qc.invalidateQueries({ queryKey: ['holdings'] });
         }}
       />
 
@@ -570,6 +578,8 @@ export function TransactionsPage() {
           setIsGmailImportOpen(false);
           qc.invalidateQueries({ queryKey: ['transactions'] });
           qc.invalidateQueries({ queryKey: ['transactions-summary'] });
+          qc.invalidateQueries({ queryKey: ['portfolio-summary'] });
+          qc.invalidateQueries({ queryKey: ['holdings'] });
         }}
       />
     </div>
@@ -614,15 +624,16 @@ function CategorySelector({
 
   return (
     <div className="space-y-1.5">
-      <p className="text-xs font-medium text-white/60">Category</p>
+      <p className="fc-field-label">Category</p>
 
       {/* Auto-detect badge */}
       {detected && !overridden && (
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-900/30 border border-brand-500/30 animate-fade-in">
-          <Sparkles className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" strokeWidth={2} />
-          <span className="text-xs text-brand-300">
-            Auto-detected category:{' '}
-            <span className="font-semibold text-brand-200">{detected.icon} {detected.name}</span>
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border animate-fade-in"
+             style={{ backgroundColor: 'rgba(var(--color-brand), 0.08)', borderColor: 'rgba(var(--color-brand), 0.25)' }}>
+          <Sparkles className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgb(var(--color-brand))' }} strokeWidth={2} />
+          <span className="text-xs" style={{ color: 'rgb(var(--color-brand))' }}>
+            Auto-detected:{' '}
+            <span className="font-semibold">{detected.icon} {detected.name}</span>
           </span>
         </div>
       )}
@@ -632,7 +643,8 @@ function CategorySelector({
         <button
           type="button"
           onClick={() => setShowDropdown((s) => !s)}
-          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-surface-input border border-white/10 hover:border-white/20 transition-colors duration-200 ease-out text-sm text-white/80"
+          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-colors duration-200 ease-out"
+          style={{ backgroundColor: 'var(--surface-input)', border: '1px solid var(--surface-border)', color: 'var(--text-primary)' }}
         >
           <span className="flex items-center gap-2">
             {activeCat ? (
@@ -641,18 +653,19 @@ function CategorySelector({
                 <span>{activeCat.name}</span>
               </>
             ) : (
-              <span className="text-white/40">Select category (optional)</span>
+              <span style={{ color: 'var(--text-muted)' }}>Select category (optional)</span>
             )}
           </span>
-          <ChevronDown className="w-4 h-4 text-white/40 flex-shrink-0 transition-transform duration-200" strokeWidth={2} />
+          <ChevronDown className="w-4 h-4 flex-shrink-0 transition-transform duration-200" style={{ color: 'var(--text-muted)' }} strokeWidth={2} />
         </button>
 
         {showDropdown && (
-          <div className="absolute z-50 top-full mt-1 w-full bg-surface border border-white/10 rounded-xl shadow-2xl overflow-auto max-h-52 py-1 animate-scale-in">
+          <div className="absolute z-50 top-full mt-1 w-full rounded-xl shadow-card-lg overflow-auto max-h-52 py-1 animate-scale-in"
+               style={{ backgroundColor: 'var(--surface-card)', border: '1px solid var(--surface-border)' }}>
             <button
               type="button"
               onClick={() => handleManualSelect(undefined)}
-              className="w-full text-left px-3 py-2 text-sm text-white/50 hover:bg-white/5 transition-colors duration-150 ease-out"
+              className="w-full text-left px-3 py-2 text-sm transition-colors duration-150 ease-out fc-btn-ghost"
             >
               None
             </button>
@@ -661,9 +674,9 @@ function CategorySelector({
                 key={cat.id}
                 type="button"
                 onClick={() => handleManualSelect(cat.id)}
-                className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-white/5 transition-colors duration-150 ease-out ${
-                  value === cat.id ? 'text-brand-300' : 'text-white/80'
-                }`}
+                className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors duration-150 ease-out
+                ${ value === cat.id ? 'text-brand-500 dark:text-brand-400' : '' }`}
+              style={{ color: value === cat.id ? undefined : 'var(--text-secondary)' }}
               >
                 <span>{cat.icon}</span>
                 <span>{cat.name}</span>

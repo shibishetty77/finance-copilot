@@ -5,16 +5,16 @@ interface InsightCardProps {
   title: string;
   description: string;
   icon?: ElementType;
-  accent?: 'brand' | 'income' | 'expense' | 'purple';
+  accent?: 'brand' | 'income' | 'expense' | 'neutral';
   className?: string;
   children?: ReactNode;
 }
 
 const accents = {
-  brand: 'from-brand-600/20 to-brand-600/5 border-brand-500/20 text-brand-400',
-  income: 'from-income/20 to-income/5 border-income/20 text-income',
-  expense: 'from-expense/20 to-expense/5 border-expense/20 text-expense',
-  purple: 'from-purple-600/20 to-purple-600/5 border-purple-500/20 text-purple-400',
+  brand:   'from-brand-500/10 to-brand-500/5 border-brand-500/20 text-brand-600 dark:text-brand-400',
+  income:  'from-income/10 to-income/5 border-income/20 text-income',
+  expense: 'from-expense/10 to-expense/5 border-expense/20 text-expense',
+  neutral: 'from-surface-input to-surface-input border-surface-border text-secondary',
 };
 
 export function InsightCard({
@@ -42,7 +42,7 @@ export function InsightCard({
         )}
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-wide opacity-80">{title}</p>
-          <p className="text-sm text-white/85 leading-relaxed mt-1">{description}</p>
+          <p className="text-sm leading-relaxed mt-1" style={{ color: 'var(--text-secondary)' }}>{description}</p>
           {children}
         </div>
       </div>

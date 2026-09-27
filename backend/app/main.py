@@ -1,5 +1,5 @@
 """
-Finance Copilot — FastAPI application factory.
+CortexFi — FastAPI application factory.
 Configures middleware, routers, and exception handlers.
 """
 

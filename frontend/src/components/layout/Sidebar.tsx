@@ -6,7 +6,6 @@ import {
   Target,
   BarChart3,
   MessageSquareText,
-  IndianRupee,
   Wallet,
   ChevronLeft,
   ChevronRight,
@@ -23,7 +22,7 @@ const NAV_ITEMS = [
   { to: '/networth', icon: Wallet, label: 'Net Worth' },
   { to: '/goals', icon: Target, label: 'Goals' },
   { to: '/analytics', icon: BarChart3, label: 'Analytics' },
-  { to: '/ai-chat', icon: MessageSquareText, label: 'AI Assistant' },
+  { to: '/ai-chat', icon: MessageSquareText, label: 'Ask Cortex' },
   { to: '/ai-settings', icon: Settings, label: 'AI Settings' },
 ];
 
@@ -35,7 +34,7 @@ export function Sidebar() {
     .map((n) => n[0])
     .join('')
     .slice(0, 2)
-    .toUpperCase() || 'FC';
+    .toUpperCase() || 'CF';
 
   return (
     <aside
@@ -48,13 +47,14 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-surface-border shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shrink-0 shadow-glow transition-transform duration-300 ease-out hover:scale-105">
-          <IndianRupee className="w-5 h-5 text-white" strokeWidth={2} />
+        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center shrink-0 transition-transform duration-200 ease-out hover:scale-105 font-bold text-white text-base shadow-sm">
+          C
         </div>
         {sidebarOpen && (
           <div className="animate-fade-in overflow-hidden">
-            <span className="font-bold text-white text-sm block leading-tight">Finance</span>
-            <span className="text-gradient font-bold text-sm leading-tight">Copilot</span>
+            <span className="font-bold text-base block leading-tight tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              Cortex<span className="text-gradient">Fi</span>
+            </span>
           </div>
         )}
       </div>
@@ -78,14 +78,14 @@ export function Sidebar() {
 
       {/* Profile */}
       {sidebarOpen && user && (
-        <div className="px-3 py-3 mx-3 mb-2 rounded-xl bg-surface-hover/50 border border-surface-border animate-fade-in hover:bg-surface-hover transition-colors duration-200 ease-out">
+        <div className="px-3 py-3 mx-3 mb-2 rounded-lg border transition-colors duration-200 ease-out animate-fade-in" style={{ backgroundColor: 'var(--surface-hover)', borderColor: 'var(--surface-border)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white shrink-0 shadow-glow">
+            <div className="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">{user.full_name}</p>
-              <p className="text-xs text-white/40 truncate">{user.email}</p>
+              <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user.full_name}</p>
+              <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{user.email}</p>
             </div>
           </div>
         </div>
@@ -95,8 +95,7 @@ export function Sidebar() {
       <button
         onClick={toggleSidebar}
         className={cn(
-          'flex items-center gap-2 p-4 border-t border-surface-border',
-          'text-white/40 hover:text-white hover:bg-surface-hover active:bg-surface-hover/80 transition-all duration-200 ease-out text-sm font-medium',
+          'flex items-center gap-2 p-4 border-t transition-all duration-200 ease-out text-sm font-medium',
           !sidebarOpen && 'justify-center',
         )}
         aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}

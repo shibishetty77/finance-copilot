@@ -162,7 +162,7 @@ export function AISettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>AI Provider</CardTitle>
-          <Settings className="w-4 h-4 text-white/40" />
+          <Settings className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
         </CardHeader>
 
         <form
@@ -176,7 +176,7 @@ export function AISettingsPage() {
         >
           {/* Mode Selection */}
           <div className="space-y-3">
-            <label className="text-sm font-medium text-white/70">Select Mode</label>
+            <label className="fc-field-label">Select Mode</label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <button
                 type="button"
@@ -187,9 +187,9 @@ export function AISettingsPage() {
               >
                 <div className="flex items-center gap-3">
                   <Cloud className="w-5 h-5 text-brand-500" />
-                  <span className="font-semibold text-white">Finance Copilot Cloud</span>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>CortexFi Cloud</span>
                 </div>
-                <p className="mt-2 text-xs text-white/50 text-left">
+                <p className="mt-2 text-xs text-left" style={{ color: 'var(--text-secondary)' }}>
                   ✓ Zero setup<br />
                   ✓ Optimized for speed<br />
                   ✓ Cost-efficient AI models<br />
@@ -205,10 +205,10 @@ export function AISettingsPage() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Server className="w-5 h-5 text-white/70" />
-                  <span className="font-semibold text-white">Bring Your Own AI</span>
+                  <Server className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Bring Your Own AI</span>
                 </div>
-                <p className="mt-2 text-xs text-white/50 text-left">
+                <p className="mt-2 text-xs text-left" style={{ color: 'var(--text-secondary)' }}>
                   Use OpenRouter, Gemini, OpenAI, Claude, or Ollama
                 </p>
               </button>
@@ -271,14 +271,14 @@ export function AISettingsPage() {
 
               {availableModels.length > 0 && (
                 <div className="pt-2">
-                  <p className="text-xs text-white/50 mb-1">Available models:</p>
+                  <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Available models:</p>
                   <div className="max-h-32 overflow-y-auto p-2 rounded-lg bg-surface-elevated border border-surface-border space-y-1">
                     {availableModels.map((model) => (
                       <button
                         key={model}
                         type="button"
                         onClick={() => aiForm.setValue('default_model', model)}
-                        className="w-full text-left text-sm text-white/70 hover:text-white hover:bg-surface-hover px-2 py-1 rounded"
+                        className="w-full text-left text-sm px-2 py-1 rounded transition-colors duration-150 fc-btn-ghost"
                       >
                         {model}
                       </button>
@@ -321,13 +321,13 @@ export function AISettingsPage() {
                       <div className="text-sm">
                         <p className="text-income font-medium">Connected</p>
                         {testResult.provider && (
-                          <p className="text-white/60">Provider: {testResult.provider}</p>
+                          <p style={{ color: 'var(--text-secondary)' }}>Provider: {testResult.provider}</p>
                         )}
                         {testResult.model && (
-                          <p className="text-white/60">Model: {testResult.model}</p>
+                          <p style={{ color: 'var(--text-secondary)' }}>Model: {testResult.model}</p>
                         )}
                         {testResult.latency_ms && (
-                          <p className="text-white/60">Latency: {testResult.latency_ms}ms</p>
+                          <p style={{ color: 'var(--text-secondary)' }}>Latency: {testResult.latency_ms}ms</p>
                         )}
                       </div>
                     </div>
@@ -337,7 +337,7 @@ export function AISettingsPage() {
                       <div className="text-sm">
                         <p className="text-expense font-medium">Failed</p>
                         {testResult.error && (
-                          <p className="text-white/60">{testResult.error}</p>
+                          <p style={{ color: 'var(--text-secondary)' }}>{testResult.error}</p>
                         )}
                       </div>
                     </div>
@@ -352,7 +352,8 @@ export function AISettingsPage() {
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-sm transition-colors"
+              style={{ color: 'var(--text-secondary)' }}
             >
               <Settings className="w-4 h-4" />
               Advanced settings
@@ -368,8 +369,8 @@ export function AISettingsPage() {
                     onChange={(e) => aiForm.setValue('cloud_fallback_enabled', e.target.checked)}
                     className="w-4 h-4 rounded border-surface-border bg-surface-input text-brand-500 focus:ring-brand-500"
                   />
-                  <label htmlFor="cloud-fallback" className="text-sm text-white/70">
-                    Fall back to Finance Copilot Cloud if my provider fails
+                  <label htmlFor="cloud-fallback" className="fc-field-label mb-0">
+                    Fall back to CortexFi Cloud if my provider fails
                   </label>
                 </div>
 

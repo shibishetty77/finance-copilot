@@ -33,7 +33,7 @@ function SummaryCard({
       <CardHeader>
         <p className="fc-label">{label}</p>
         <div className={`fc-stat-icon ${color}`}>
-          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+          <Icon className="w-[18px] h-[18px]" strokeWidth={2} />
         </div>
       </CardHeader>
       <div className="fc-stat-value">{value}</div>
@@ -147,25 +147,25 @@ export function GoalsPage() {
           label="Total Goals"
           value={stats.totalGoals.toString()}
           icon={Target}
-          color="bg-brand-600"
+          color="fc-icon-brand"
         />
         <SummaryCard
           label="Active Goals"
           value={stats.activeGoals.toString()}
           icon={TrendingUp}
-          color="bg-brand-500"
+          color="fc-icon-brand"
         />
         <SummaryCard
           label="Total Target Value"
           value={formatCurrency(stats.totalTargetValue)}
           icon={IndianRupee}
-          color="bg-purple-600"
+          color="fc-icon-neutral"
         />
         <SummaryCard
           label="Overall Progress"
           value={`${stats.overallProgress.toFixed(0)}%`}
           icon={CheckCircle2}
-          color="bg-income/80"
+          color="fc-icon-income"
         />
       </div>
 
@@ -231,7 +231,7 @@ export function GoalsPage() {
           }
         }} className="space-y-4">
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Goal Name</label>
+            <label className="fc-field-label">Goal Name</label>
             <Input
               value={selectedGoal?.name || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedGoal(prev => prev ? { ...prev, name: e.target.value } : null)}
@@ -239,7 +239,7 @@ export function GoalsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-white/60 mb-1.5">Target Amount (₹)</label>
+              <label className="fc-field-label">Target Amount (₹)</label>
               <Input
                 type="number"
                 step="0.01"
@@ -249,7 +249,7 @@ export function GoalsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1.5">Current Amount (₹)</label>
+              <label className="fc-field-label">Current Amount (₹)</label>
               <Input
                 type="number"
                 step="0.01"
@@ -260,7 +260,7 @@ export function GoalsPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Target Date (optional)</label>
+            <label className="fc-field-label">Target Date (optional)</label>
             <Input
               type="date"
               value={selectedGoal?.target_date?.split('T')[0] || ''}
@@ -268,7 +268,7 @@ export function GoalsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Description (optional)</label>
+            <label className="fc-field-label">Description (optional)</label>
             <Input
               value={selectedGoal?.description || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSelectedGoal(prev => prev ? { ...prev, description: e.target.value } : null)}

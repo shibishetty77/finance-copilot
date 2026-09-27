@@ -129,7 +129,7 @@ export const aiApi = {
   // Implement them when the corresponding backend endpoints are built.
 
   /**
-   * AI Finance Assistant — send a message and get a response.
+   * Cortex AI Assistant — send a message and get a response.
    *
    * The backend builds financial context from the user's data,
    * calls Ollama, persists the exchange, and returns the assistant's reply.

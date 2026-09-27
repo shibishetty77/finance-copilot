@@ -39,12 +39,12 @@ function SummaryCard({
       <CardHeader>
         <p className="fc-label">{label}</p>
         <div className={`fc-stat-icon ${color}`}>
-          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+          <Icon className="w-[18px] h-[18px]" strokeWidth={2} />
         </div>
       </CardHeader>
       <div className="fc-stat-value">{value}</div>
       {helperText && (
-        <p className="text-xs text-white/40 mt-2">{helperText}</p>
+        <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>{helperText}</p>
       )}
       {trend !== undefined && (
         <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${trend >= 0 ? 'text-income' : 'text-expense'}`}>
@@ -91,8 +91,14 @@ export function NetWorthPage() {
 
   // Calculations
   const portfolioValue = portfolioSummary?.total_portfolio_value || 0;
-  const totalAssets = cashBalance + portfolioValue;
-  const totalLiabilities = 0; // MVP Requirement: Liabilities = 0
+  
+  // Assets: positive cash + portfolio value
+  const positiveCashBalance = Math.max(0, cashBalance);
+  const totalAssets = positiveCashBalance + portfolioValue;
+  
+  // Liabilities: negative cash (debt) + tracked debts
+  const negativeCashBalance = Math.min(0, cashBalance);
+  const totalLiabilities = Math.abs(negativeCashBalance); // MVP: only negative cash as liability for now
   const netWorth = totalAssets - totalLiabilities;
 
   // Calculate Monthly Growth %
@@ -174,27 +180,27 @@ export function NetWorthPage() {
           label="Net Worth"
           value={formatCurrency(netWorth)}
           icon={IndianRupee}
-          color="bg-purple-600"
+          color="fc-icon-neutral"
           helperText="Net Worth = Assets − Liabilities"
         />
         <SummaryCard
           label="Total Assets"
           value={formatCurrency(totalAssets)}
           icon={Wallet}
-          color="bg-brand-600"
+          color="fc-icon-brand"
         />
         <SummaryCard
           label="Liabilities"
           value={formatCurrency(totalLiabilities)}
           icon={TrendingDown}
-          color="bg-expense/80"
-          helperText="Debt tracking coming soon"
+          color="fc-icon-expense"
+          helperText="No debts tracked yet"
         />
         <SummaryCard
           label="Monthly Growth"
           value={monthlyGrowth !== null ? formatPercent(monthlyGrowth) : 'N/A'}
           icon={TrendingUp}
-          color="bg-income/80"
+          color="fc-icon-income"
           trend={monthlyGrowth !== null ? monthlyGrowth : undefined}
           helperText={monthlyGrowth === null ? "Need 2+ months of history" : undefined}
         />

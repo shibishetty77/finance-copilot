@@ -63,7 +63,7 @@ function SummaryCard({
       <CardHeader>
         <p className="fc-label">{label}</p>
         <div className={`fc-stat-icon ${color}`}>
-          <Icon className="w-5 h-5 text-white" strokeWidth={2} />
+          <Icon className="w-[18px] h-[18px]" strokeWidth={2} />
         </div>
       </CardHeader>
       <div className="fc-stat-value">{value}</div>
@@ -99,7 +99,7 @@ function ScoreWidget({
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <Icon className="w-4 h-4 text-brand-400" />
+        <Icon className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
       </CardHeader>
       <div className="flex items-center justify-center py-4">
         <div className={`w-24 h-24 rounded-full flex items-center justify-center ${colorClass}`}>
@@ -108,9 +108,9 @@ function ScoreWidget({
       </div>
       {recommendations.length > 0 && (
         <div className="mt-4 space-y-2">
-          <p className="text-xs text-white/50 font-medium">Recommendations:</p>
+          <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>Recommendations:</p>
           {recommendations.slice(0, 2).map((rec, i) => (
-            <p key={i} className="text-xs text-white/70">• {rec}</p>
+            <p key={i} className="text-xs" style={{ color: 'var(--text-secondary)' }}>• {rec}</p>
           ))}
         </div>
       )}
@@ -351,7 +351,7 @@ export function PortfolioPage() {
           label="Invested Amount"
           value={summary ? formatCurrency(summary.total_invested_amount) : '₹0'}
           icon={IndianRupee}
-          color="bg-purple-600"
+          color="bg-surface-input"
         />
         <SummaryCard
           label="Gain/Loss"

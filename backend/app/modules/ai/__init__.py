@@ -1,5 +1,5 @@
 """
-AI module — reusable AI infrastructure for Finance Copilot.
+AI module — reusable AI infrastructure for CortexFi.
 
 This package is the single entry point for all AI capabilities:
   - Text generation

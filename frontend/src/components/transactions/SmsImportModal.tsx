@@ -1,5 +1,5 @@
 /**
- * SmsImportModal — Finance Copilot SMS Import (Phase 5).
+ * SmsImportModal — CortexFi SMS Import (Phase 5).
  *
  * Manages four internal states:
  *   1. "input"   — large textarea, Parse SMS / Cancel buttons

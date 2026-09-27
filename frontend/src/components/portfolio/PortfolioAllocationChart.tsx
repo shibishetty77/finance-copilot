@@ -18,7 +18,7 @@ interface PortfolioAllocationChartProps {
   isLoading: boolean;
 }
 
-// Color palette matching Finance Copilot theme
+// Color palette matching CortexFi theme
 const COLORS = [
   '#8b5cf6', // purple-500
   '#06b6d4', // cyan-500

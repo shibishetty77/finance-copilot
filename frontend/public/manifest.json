@@ -1,0 +1,16 @@
+{
+  "name": "CortexFi",
+  "short_name": "CortexFi",
+  "description": "Your wealth. Under intelligent control.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#0f0f1a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

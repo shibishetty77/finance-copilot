@@ -11,7 +11,7 @@ interface ProgressRingProps {
 export function ProgressRing({
   progress,
   size = 72,
-  strokeWidth = 6,
+  strokeWidth = 5,
   className,
   label,
 }: ProgressRingProps) {
@@ -23,38 +23,34 @@ export function ProgressRing({
   return (
     <div className={cn('relative inline-flex items-center justify-center', className)}>
       <svg width={size} height={size} className="-rotate-90">
+        {/* Track */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.08)"
+          stroke="var(--surface-input)"
           strokeWidth={strokeWidth}
         />
+        {/* Fill — single brand color, no purple */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="url(#progressRingGrad)"
+          stroke="rgb(20 184 166)"  /* brand-500 teal */
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           className="transition-all duration-700 ease-out"
         />
-        <defs>
-          <linearGradient id="progressRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#6366f1" />
-            <stop offset="100%" stopColor="#a855f7" />
-          </linearGradient>
-        </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm font-bold text-white tabular-nums">
+        <span className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
           {Math.round(clamped)}%
         </span>
-        {label && <span className="text-[10px] text-white/40">{label}</span>}
+        {label && <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{label}</span>}
       </div>
     </div>
   );

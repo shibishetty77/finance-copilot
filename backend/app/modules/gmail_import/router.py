@@ -6,7 +6,7 @@ from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.user import User
 from app.models.gmail_credential import GmailCredential
-from app.modules.ai.providers import get_provider
+from app.modules.ai.providers import AIProvider, get_provider
 from app.modules.ai.service import AIService
 from app.modules.gmail_import.schemas import (
     GmailAuthStatus,
@@ -70,7 +70,7 @@ async def scan(
     payload: GmailScanRequest,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
-    provider = Depends(get_provider)
+    provider: AIProvider = Depends(get_provider)
 ) -> GmailScanResponse:
     ai_service = AIService(provider)
     svc = GmailImportService(db, ai_service)

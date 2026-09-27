@@ -123,6 +123,10 @@ class GmailImportService:
         if not cred:
             raise ValueError("Gmail account not connected.")
 
+        if self.ai_service is None:
+            raise ValueError("AI service is not configured for Gmail import.")
+
+
         token = await self.get_valid_token(cred)
         
         # Calculate date threshold for Gmail API query (e.g. after:YYYY/MM/DD)
@@ -317,7 +321,7 @@ class GmailImportService:
             res = await client.get(url, headers=headers)
             if res.status_code != 200:
                 raise RuntimeError("Failed to fetch user Gmail profile.")
-            return res.json()["emailAddress"]
+            return str(res.json()["emailAddress"])
 
     def _extract_email_body(self, payload: dict[str, Any]) -> str:
         """Extract body text from Google API message payload structure."""

@@ -21,7 +21,7 @@ import type { ParsedTransaction } from '@/types/transaction-parser';
  *              relative dates like "yesterday", "last week".
  */
 export function buildTransactionPrompt(text: string, today: string): string {
-  return `You are a financial data extraction assistant for an Indian personal finance app called Finance Copilot.
+  return `You are a financial data extraction assistant for an Indian personal finance app called CortexFi.
 
 Today's date is ${today}.
 

@@ -4,20 +4,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens ──────────────────────────────────────────────────────────── */
 :root {
-  --color-brand: 99 102 241;
-  --color-income: 16 185 129;
-  --color-expense: 244 63 94;
+  --color-brand: 20 184 166;        /* teal-500 */
+  --color-income: 22 163 74;        /* green-600 */
+  --color-expense: 220 38 38;       /* red-600 */
   --sidebar-width: 256px;
   --topbar-height: 64px;
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 40px;
-  --space-6: 48px;
+
+  /* Light mode surface variables */
+  --surface-bg:     #f8fafc;
+  --surface-card:   #ffffff;
+  --surface-input:  #f1f5f9;
+  --surface-border: #e2e8f0;
+  --surface-hover:  #f1f5f9;
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+
+  /* Chart helpers — theme-aware */
+  --chart-axis-color: #94a3b8;
+  --chart-grid-color: rgba(0,0,0,0.06);
 }
 
+.dark {
+  --surface-bg:     #0c0c16;
+  --surface-card:   #13131f;
+  --surface-input:  #1a1a2e;
+  --surface-border: #252540;
+  --surface-hover:  #181828;
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted:     #475569;
+
+  --chart-axis-color: #64748b;
+  --chart-grid-color: rgba(255,255,255,0.06);
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────────── */
 @layer base {
   * {
     @apply box-border;
@@ -28,305 +52,385 @@
   }
 
   body {
-    @apply bg-surface text-white font-sans antialiased;
-    background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.04) 0%, transparent 50%);
+    background-color: var(--surface-bg);
+    color: var(--text-primary);
+    @apply font-sans antialiased;
     min-height: 100vh;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    @apply bg-surface-card;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-surface-border rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-brand-600;
-  }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track  { background: var(--surface-input); }
+  ::-webkit-scrollbar-thumb  { background: var(--surface-border); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(var(--color-brand), 0.5); }
 
   *:focus-visible {
-    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-surface;
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+    ring-offset-color: var(--surface-bg);
   }
 }
 
+/* ── Component layer ─────────────────────────────────────────────────────────── */
 @layer components {
-  .fc-page {
-    @apply space-y-6 animate-fade-in;
-  }
 
+  /* ── Cards ──────────────────────────────────────────────────────────── */
   .fc-card {
-    @apply bg-surface-card border border-surface-border rounded-2xl p-6 shadow-card
-           transition-all duration-300 ease-out;
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    color: var(--text-primary);
+    @apply rounded-xl p-6 shadow-card transition-all duration-200 ease-out;
   }
 
   .fc-card-interactive {
-    @apply fc-card hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-card-lg cursor-pointer;
+    @apply fc-card cursor-pointer;
+  }
+  .fc-card-interactive:hover {
+    border-color: rgba(var(--color-brand), 0.30);
+    @apply -translate-y-px shadow-card-lg;
   }
 
   .fc-card-sm {
-    @apply bg-surface-card border border-surface-border rounded-2xl p-4 shadow-card
-           transition-all duration-300 ease-out;
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    @apply rounded-xl p-4 shadow-card transition-all duration-200 ease-out;
   }
 
   .fc-card-lg {
-    @apply bg-surface-card border border-surface-border rounded-2xl p-8 shadow-card
-           transition-all duration-300 ease-out;
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    @apply rounded-xl p-8 shadow-card transition-all duration-200 ease-out;
   }
 
+  /* Glass: only meaningful in dark mode */
   .fc-glass {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+    @apply backdrop-blur-xl border rounded-xl;
+    background-color: var(--surface-card);
+    border-color: var(--surface-border);
   }
 
+  /* ── Inputs ─────────────────────────────────────────────────────────── */
   .fc-input {
-    @apply w-full bg-surface-input border border-surface-border rounded-xl px-4 py-3
-           text-white placeholder-white/30 text-sm
-           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500
-           transition-colors duration-200;
+    @apply w-full rounded-lg px-4 py-2.5 text-sm transition-colors duration-200;
+    background-color: var(--surface-input);
+    border: 1px solid var(--surface-border);
+    color: var(--text-primary);
+  }
+  .fc-input::placeholder { color: var(--text-muted); }
+  .fc-input:focus {
+    @apply outline-none ring-1 ring-brand-500;
+    border-color: rgb(var(--color-brand));
   }
 
   .fc-input-lg {
-    @apply w-full bg-surface-input border border-surface-border rounded-xl px-5 py-4
-           text-white placeholder-white/30 text-base
-           focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500
-           transition-colors duration-200;
+    @apply fc-input px-5 py-3.5 text-base;
   }
 
+  /* ── Buttons ─────────────────────────────────────────────────────────── */
   .fc-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 h-11
+    @apply inline-flex items-center justify-center gap-2 h-10
            bg-brand-600 hover:bg-brand-500 active:scale-[0.97] active:bg-brand-700
            text-white font-semibold text-sm
-           px-5 rounded-xl
+           px-5 rounded-lg
            transition-all duration-200 ease-out
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-glow
-           shadow-glow hover:shadow-glow-lg;
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
   }
 
   .fc-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 h-11
-           bg-surface-input hover:bg-surface-hover active:scale-[0.97]
-           border border-surface-border hover:border-brand-500/50
-           text-white/70 hover:text-white font-medium text-sm
-           px-5 rounded-xl
+    @apply inline-flex items-center justify-center gap-2 h-10
+           active:scale-[0.97]
+           font-medium text-sm
+           px-5 rounded-lg
            transition-all duration-200 ease-out
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:border-surface-border;
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    background-color: var(--surface-input);
+    border: 1px solid var(--surface-border);
+    color: var(--text-secondary);
+  }
+  .fc-btn-secondary:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-hover);
+    border-color: rgba(var(--color-brand), 0.4);
   }
 
   .fc-btn-ghost {
     @apply inline-flex items-center justify-center gap-2
-           text-white/60 hover:text-white hover:bg-surface-hover active:scale-[0.97]
            font-medium text-sm px-3 py-2 rounded-lg
-           transition-all duration-200 ease-out;
+           transition-all duration-200 ease-out active:scale-[0.97];
+    color: var(--text-secondary);
+  }
+  .fc-btn-ghost:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-hover);
   }
 
   .fc-btn-danger {
-    @apply inline-flex items-center justify-center gap-2 h-11
-           bg-expense/10 hover:bg-expense/20 active:scale-[0.97]
-           border border-expense/30 hover:border-expense/50
-           text-expense hover:text-expense font-medium text-sm
-           px-5 rounded-xl
+    @apply inline-flex items-center justify-center gap-2 h-10
+           active:scale-[0.97]
+           text-expense font-medium text-sm
+           px-5 rounded-lg
            transition-all duration-200 ease-out
-           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:bg-expense/10;
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    background-color: rgba(var(--color-expense), 0.08);
+    border: 1px solid rgba(var(--color-expense), 0.25);
+  }
+  .fc-btn-danger:hover {
+    background-color: rgba(var(--color-expense), 0.15);
+    border-color: rgba(var(--color-expense), 0.4);
   }
 
   .fc-btn-sm {
-    @apply inline-flex items-center justify-center gap-2 h-9
-           text-white/70 hover:text-white hover:bg-surface-hover active:scale-[0.97]
+    @apply inline-flex items-center justify-center gap-2 h-8
            font-medium text-xs px-3 rounded-lg
-           transition-all duration-200 ease-out;
+           transition-all duration-200 ease-out active:scale-[0.97];
+    color: var(--text-secondary);
+  }
+  .fc-btn-sm:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-hover);
   }
 
+  /* ── Badges ──────────────────────────────────────────────────────────── */
   .fc-badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium;
   }
-
   .fc-badge-brand {
-    @apply fc-badge bg-brand-500/10 text-brand-300 border border-brand-500/20;
+    @apply fc-badge;
+    background-color: rgba(var(--color-brand), 0.1);
+    color: rgb(var(--color-brand));
+    border: 1px solid rgba(var(--color-brand), 0.2);
   }
-
   .fc-badge-success {
-    @apply fc-badge bg-income/10 text-income border border-income/20;
+    @apply fc-badge;
+    background-color: rgba(var(--color-income), 0.1);
+    color: rgb(var(--color-income));
+    border: 1px solid rgba(var(--color-income), 0.2);
   }
-
   .fc-badge-warning {
     @apply fc-badge bg-warning/10 text-warning border border-warning/20;
   }
-
   .fc-badge-danger {
-    @apply fc-badge bg-expense/10 text-expense border border-expense/20;
+    @apply fc-badge;
+    background-color: rgba(var(--color-expense), 0.1);
+    color: rgb(var(--color-expense));
+    border: 1px solid rgba(var(--color-expense), 0.2);
   }
-
   .fc-badge-neutral {
-    @apply fc-badge bg-white/5 text-white/60 border border-white/10;
+    @apply fc-badge;
+    background-color: var(--surface-input);
+    color: var(--text-secondary);
+    border: 1px solid var(--surface-border);
   }
 
+  /* ── Skeleton ────────────────────────────────────────────────────────── */
   .fc-skeleton {
-    @apply bg-shimmer-gradient bg-[length:200%_100%] animate-shimmer
-           bg-surface-input rounded-lg;
+    @apply bg-[length:200%_100%] animate-shimmer rounded-lg;
+    background-color: var(--surface-input);
+    background-image: linear-gradient(90deg, transparent 25%, rgba(128,128,128,0.08) 50%, transparent 75%);
   }
+  .fc-skeleton-text   { @apply fc-skeleton h-4 w-full; }
+  .fc-skeleton-avatar { @apply fc-skeleton h-10 w-10 rounded-full; }
+  .fc-skeleton-card   { @apply fc-skeleton h-32 w-full rounded-xl; }
 
-  .fc-skeleton-text {
-    @apply fc-skeleton h-4 w-full;
-  }
+  /* ── Amount colors ───────────────────────────────────────────────────── */
+  .fc-amount-income  { @apply text-income font-semibold tabular-nums; }
+  .fc-amount-expense { @apply text-expense font-semibold tabular-nums; }
 
-  .fc-skeleton-avatar {
-    @apply fc-skeleton h-10 w-10 rounded-full;
-  }
-
-  .fc-skeleton-card {
-    @apply fc-skeleton h-32 w-full rounded-2xl;
-  }
-
-  .fc-amount-income {
-    @apply text-income font-semibold tabular-nums;
-  }
-
-  .fc-amount-expense {
-    @apply text-expense font-semibold tabular-nums;
-  }
-
+  /* ── Sidebar nav links ───────────────────────────────────────────────── */
   .sidebar-link {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/55 font-medium text-sm
-           hover:bg-surface-hover hover:text-white
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm
            transition-all duration-200 ease-out cursor-pointer relative;
+    color: var(--text-secondary);
   }
-
+  .sidebar-link:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-primary);
+  }
   .sidebar-link.active {
-    @apply bg-brand-600/20 text-brand-300 font-semibold;
+    background-color: rgba(var(--color-brand), 0.1);
+    color: rgb(var(--color-brand));
+    @apply font-semibold;
   }
-
   .sidebar-link.active::before {
     content: '';
-    @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-brand-500 shadow-glow;
+    @apply absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full;
+    background-color: rgb(var(--color-brand));
   }
 
+  /* ── Typography helpers ──────────────────────────────────────────────── */
   .fc-label {
-    @apply block text-xs font-medium text-white/50 mb-2;
+    @apply block text-xs font-medium mb-1.5 uppercase tracking-wide;
+    color: var(--text-muted);
   }
-
   .fc-label-lg {
-    @apply block text-sm font-medium text-white/60 mb-3;
+    @apply block text-sm font-medium mb-2;
+    color: var(--text-secondary);
   }
-
+  /* Form field labels — not uppercase, larger */
+  .fc-field-label {
+    @apply block text-sm font-medium mb-1.5;
+    color: var(--text-secondary);
+  }
   .fc-heading {
-    @apply text-2xl font-bold text-white tracking-tight leading-tight;
+    @apply text-2xl font-bold tracking-tight leading-tight;
+    color: var(--text-primary);
   }
-
   .fc-heading-lg {
-    @apply text-3xl font-bold text-white tracking-tight leading-tight;
+    @apply text-3xl font-bold tracking-tight leading-tight;
+    color: var(--text-primary);
   }
-
   .fc-subheading {
-    @apply text-sm text-white/50 leading-relaxed mt-1;
+    @apply text-sm leading-relaxed mt-1;
+    color: var(--text-secondary);
   }
 
-  .fc-stat-grid {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
-  }
+  /* ── Grid helpers ────────────────────────────────────────────────────── */
+  .fc-stat-grid   { @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4; }
+  .fc-stat-grid-3 { @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4; }
 
-  .fc-stat-grid-3 {
-    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
-  }
-
+  /* ── List rows ───────────────────────────────────────────────────────── */
   .fc-list-row {
-    @apply flex items-center gap-4 p-3 rounded-xl border border-transparent
-           hover:bg-surface-hover hover:border-surface-border
-           transition-all duration-200 ease-out;
+    @apply flex items-center gap-4 p-3 rounded-lg border border-transparent
+           transition-all duration-150 ease-out;
+  }
+  .fc-list-row:hover {
+    background-color: var(--surface-hover);
+    border-color: var(--surface-border);
   }
 
-  .fc-progress-bar {
-    @apply h-2 rounded-full bg-white/5 overflow-hidden;
+  /* ── Progress bars ───────────────────────────────────────────────────── */
+  .fc-progress-bar    { @apply h-1.5 rounded-full overflow-hidden; background-color: var(--surface-input); }
+  .fc-progress-bar-lg { @apply h-2 rounded-full overflow-hidden; background-color: var(--surface-input); }
+  .fc-progress-fill   {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+    background-color: rgb(var(--color-brand));
   }
 
-  .fc-progress-bar-lg {
-    @apply h-3 rounded-full bg-white/5 overflow-hidden;
-  }
-
-  .fc-progress-fill {
-    @apply h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-400
-           transition-all duration-1000 ease-out;
-  }
-
+  /* ── Icon button ─────────────────────────────────────────────────────── */
   .fc-icon-btn {
     @apply inline-flex items-center justify-center p-2 rounded-lg
-           text-white/40 hover:text-white hover:bg-surface-hover active:scale-95
-           transition-all duration-200 ease-out;
+           transition-all duration-200 ease-out active:scale-95;
+    color: var(--text-muted);
+  }
+  .fc-icon-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-hover);
   }
 
-  .fc-section {
-    @apply space-y-4;
-  }
+  /* ── Section / divider ───────────────────────────────────────────────── */
+  .fc-section  { @apply space-y-4; }
+  .fc-divider  { @apply h-px my-6; background-color: var(--surface-border); }
 
-  .fc-divider {
-    @apply h-px bg-surface-border my-6;
-  }
-
+  /* ── Stat card ───────────────────────────────────────────────────────── */
   .fc-stat-card {
-    @apply fc-card-interactive min-h-[140px] flex flex-col justify-between;
+    @apply fc-card-interactive min-h-[132px] flex flex-col justify-between;
   }
-
   .fc-stat-value {
-    @apply text-2xl font-bold text-white tabular-nums tracking-tight animate-scale-in;
+    @apply text-2xl font-bold tabular-nums tracking-tight animate-scale-in;
+    color: var(--text-primary);
   }
-
+  /* Icon chip: tonal, not solid saturated */
   .fc-stat-icon {
-    @apply w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-transform duration-300 ease-out hover:scale-110;
+    @apply w-9 h-9 rounded-lg flex items-center justify-center transition-transform duration-200 ease-out;
   }
 
-  /* AI Assistant — inline markdown rendering */
+  /* ── Stat icon variants — purposeful colors ──────────────────────────── */
+  /* Income/positive: green */
+  .fc-icon-income {
+    @apply fc-stat-icon;
+    background-color: rgba(var(--color-income), 0.1);
+    color: rgb(var(--color-income));
+  }
+  /* Expense/negative: red */
+  .fc-icon-expense {
+    @apply fc-stat-icon;
+    background-color: rgba(var(--color-expense), 0.1);
+    color: rgb(var(--color-expense));
+  }
+  /* Brand accent — primary highlight only */
+  .fc-icon-brand {
+    @apply fc-stat-icon;
+    background-color: rgba(var(--color-brand), 0.1);
+    color: rgb(var(--color-brand));
+  }
+  /* Neutral — everything else */
+  .fc-icon-neutral {
+    @apply fc-stat-icon;
+    background-color: var(--surface-input);
+    color: var(--text-secondary);
+  }
+
+  /* ── AI / prose ──────────────────────────────────────────────────────── */
   .prose-finance {
-    @apply text-sm text-white/90 leading-relaxed;
+    @apply text-sm leading-relaxed;
+    color: var(--text-primary);
   }
-
-  .prose-finance p {
-    @apply mb-2;
-  }
+  .prose-finance p { @apply mb-2; }
 
   .fc-code-block {
-    @apply block bg-surface-input border border-surface-border rounded-lg
-           px-3 py-2 mt-2 mb-2 text-xs text-brand-300 font-mono
-           overflow-x-auto whitespace-pre-wrap;
+    @apply block rounded-lg px-3 py-2 mt-2 mb-2 text-xs font-mono overflow-x-auto whitespace-pre-wrap;
+    background-color: var(--surface-input);
+    border: 1px solid var(--surface-border);
+    color: rgb(var(--color-brand));
   }
-
   .fc-inline-code {
-    @apply bg-surface-input border border-surface-border rounded px-1 py-0.5
-           text-xs text-brand-300 font-mono;
+    @apply rounded px-1 py-0.5 text-xs font-mono;
+    background-color: var(--surface-input);
+    border: 1px solid var(--surface-border);
+    color: rgb(var(--color-brand));
   }
-
-  .fc-md-ul {
-    @apply my-2 space-y-1 list-none pl-0;
-  }
-
-  .fc-md-li {
-    @apply flex items-start gap-2 text-sm text-white/80;
-  }
-
+  .fc-md-ul { @apply my-2 space-y-1 list-none pl-0; }
+  .fc-md-li { @apply flex items-start gap-2 text-sm; color: var(--text-primary); }
   .fc-md-li::before {
     content: '•';
-    @apply text-brand-400 shrink-0 mt-0.5;
+    color: rgb(var(--color-brand));
+    @apply shrink-0 mt-0.5;
+  }
+
+  /* ── Page wrapper ────────────────────────────────────────────────────── */
+  .fc-page { @apply space-y-6 animate-fade-in; }
+
+  /* ── Chat bubble helpers — theme-aware ───────────────────────────────── */
+  .fc-chat-user {
+    background-color: rgba(var(--color-brand), 0.12);
+    border: 1px solid rgba(var(--color-brand), 0.25);
+    @apply rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-relaxed;
+    color: var(--text-primary);
+  }
+  .fc-chat-assistant {
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    @apply rounded-2xl rounded-bl-sm px-4 py-3 text-sm leading-relaxed;
+    color: var(--text-primary);
+  }
+  .fc-chat-prompt-btn {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm
+           transition-all duration-200;
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    color: var(--text-secondary);
+  }
+  .fc-chat-prompt-btn:hover {
+    color: var(--text-primary);
+    border-color: rgba(var(--color-brand), 0.35);
+    background-color: var(--surface-hover);
   }
 }
 
+/* ── Utilities ───────────────────────────────────────────────────────────────── */
 @layer utilities {
+  /* Brand text gradient — teal only */
   .text-gradient {
-    @apply bg-gradient-to-r from-brand-400 to-purple-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand-500 to-brand-300 bg-clip-text text-transparent;
   }
 
-  .duration-250 {
-    transition-duration: 250ms;
-  }
+  /* Theme-aware text helpers */
+  .fc-text-primary   { color: var(--text-primary); }
+  .fc-text-secondary { color: var(--text-secondary); }
+  .fc-text-muted     { color: var(--text-muted); }
 
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  .duration-250 { transition-duration: 250ms; }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
   .animate-slide-in {
     animation: slideIn 0.3s ease-out;
@@ -334,12 +438,6 @@
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }

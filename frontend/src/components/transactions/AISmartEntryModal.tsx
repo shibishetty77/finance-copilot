@@ -1,5 +1,5 @@
 /**
- * AISmartEntryModal — Finance Copilot AI Smart Entry (Phase 2).
+ * AISmartEntryModal — CortexFi AI Smart Entry (Phase 2).
  *
  * Manages three internal states:
  *   1. "input"   — large textarea, Analyze / Cancel buttons
@@ -325,7 +325,7 @@ export function AISmartEntryModal({
               ✨ AI Smart Entry
             </h2>
             <p className="text-sm text-white/50 max-w-sm mx-auto leading-relaxed">
-              Describe your transaction naturally and Finance Copilot will extract the details.
+              Describe your transaction naturally and Cortex will extract the details.
             </p>
           </div>
 
@@ -409,7 +409,7 @@ export function AISmartEntryModal({
               <Loader2 className="w-7 h-7 text-brand-400 animate-spin" />
             </div>
             <h2 className="text-lg font-bold text-white">Analyzing your transaction…</h2>
-            <p className="text-sm text-white/40">Finance Copilot is reading between the lines</p>
+            <p className="text-sm text-white/40">Cortex is reading between the lines</p>
           </div>
 
           {/* Quoted input */}
@@ -464,7 +464,7 @@ export function AISmartEntryModal({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" strokeWidth={2} />
-                <h2 className="text-lg font-bold text-white">Finance Copilot understood</h2>
+                <h2 className="text-lg font-bold text-white">Cortex understood</h2>
               </div>
               <p className="text-sm text-white/40">
                 Please review the extracted information before continuing.

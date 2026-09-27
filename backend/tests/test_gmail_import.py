@@ -2,6 +2,8 @@ import pytest
 from datetime import datetime, timezone, timedelta, date
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy import select
+from typing import Any
+
 
 from app.models.gmail_credential import GmailCredential
 from app.models.transaction import Transaction
@@ -9,13 +11,13 @@ from app.modules.gmail_import.service import GmailImportService, GMAIL_SEARCH_QU
 from app.modules.gmail_import.schemas import GmailImportItem
 
 @pytest.mark.asyncio
-async def test_get_auth_url():
+async def test_get_auth_url() -> None:
     service = GmailImportService(db=AsyncMock())
     url = service.get_auth_url()
     assert "accounts.google.com" in url
     assert "scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.readonly" in url
 
-def test_clean_email_text():
+def test_clean_email_text() -> None:
     service = GmailImportService(db=AsyncMock())
     html_text = """
     <html>
@@ -39,7 +41,7 @@ def test_clean_email_text():
 @pytest.mark.asyncio
 @patch("httpx.AsyncClient.post")
 @patch("app.modules.gmail_import.service.GmailImportService._fetch_user_email")
-async def test_exchange_code_for_tokens(mock_fetch_email, mock_post):
+async def test_exchange_code_for_tokens(mock_fetch_email: MagicMock, mock_post: MagicMock) -> None:
     mock_post.return_value = MagicMock(
         status_code=200,
         json=lambda: {
@@ -61,11 +63,11 @@ async def test_exchange_code_for_tokens(mock_fetch_email, mock_post):
     db_session.flush.assert_called_once()
 
 @pytest.mark.asyncio
-async def test_import_transactions():
+async def test_import_transactions() -> None:
     db_session = AsyncMock()
     # Mocking existing transactions query returning empty list (no duplicates)
     mock_execute_result = MagicMock()
-    mock_execute_result.scalars.return_value.all.return_value = []
+    mock_execute_result.scalars.return_value.all.return_value = []  # type: ignore[var-annotated]
     db_session.execute.return_value = mock_execute_result
 
     service = GmailImportService(db=db_session)

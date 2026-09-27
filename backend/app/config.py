@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     # ── Application ───────────────────────────────────────────────────────────
-    APP_NAME: str = "Finance Copilot"
+    APP_NAME: str = "CortexFi"
     APP_ENV: Literal["development", "staging", "production"] = "development"
     DEBUG: bool = False
 

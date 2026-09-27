@@ -63,12 +63,12 @@ export function Modal({ open, onClose, title, description, children, size = 'md'
           <div className="flex items-start justify-between p-6 border-b border-surface-border flex-shrink-0">
             <div>
               {title && (
-                <h2 id="modal-title" className="text-lg font-semibold text-white">
+                <h2 id="modal-title" className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {title}
                 </h2>
               )}
               {description && (
-                <p className="mt-1 text-sm text-white/50">{description}</p>
+                <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>{description}</p>
               )}
             </div>
             <button

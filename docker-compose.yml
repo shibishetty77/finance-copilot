@@ -1,13 +1,11 @@
-version: "3.9"
-
 services:
   # ── PostgreSQL Database ───────────────────────────────────────────────────
   db:
     image: postgres:16-alpine
-    container_name: financecopilot_db
+    container_name: cortexfi_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB:       financecopilot
+      POSTGRES_DB:       cortexfi
       POSTGRES_USER:     dev
       POSTGRES_PASSWORD: dev
     ports:
@@ -15,7 +13,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev -d financecopilot"]
+      test: ["CMD-SHELL", "pg_isready -U dev -d cortexfi"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -25,11 +23,11 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: financecopilot_api
+    container_name: cortexfi_api
     restart: unless-stopped
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
     environment:
-      DATABASE_URL:                   postgresql+asyncpg://dev:dev@db:5432/financecopilot
+      DATABASE_URL:                   postgresql+asyncpg://dev:dev@db:5432/cortexfi
       SECRET_KEY:                     dev-secret-key-change-in-production-32bytes
       ALGORITHM:                      HS256
       ACCESS_TOKEN_EXPIRE_MINUTES:    15
@@ -38,6 +36,8 @@ services:
       DEBUG:                          "true"
       APP_ENV:                        development
       GEMINI_API_KEY:                 ${GEMINI_API_KEY:-}
+      OLLAMA_URL:                     http://host.docker.internal:11434
+      OLLAMA_MODEL:                   llama3.2:3b
     ports:
       - "8000:8000"
     depends_on:

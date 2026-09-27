@@ -1,5 +1,5 @@
 """
-AI Finance Assistant — Context Engine.
+Cortex AI Assistant — Context Engine.
 
 Provides internal "tools" that query the user's financial data and return
 compact, LLM-ready summaries.  Only the data relevant to the user's question
@@ -70,7 +70,7 @@ def _last_month_range() -> tuple[date, date]:
     last = date(year, month, calendar.monthrange(year, month)[1])
     return first, last
 
-def _parse_period(period: str | None) -> tuple[date | None, date | None]:
+def _parse_period(period: str | None) -> tuple[date, date]:
     """Convert a period string into a date range."""
     if not period or period == "current_month":
         return _current_month_range()
@@ -221,7 +221,7 @@ async def get_recent_transactions(
             "date": str(t.transaction_date),
             "description": t.description or t.merchant_name or "—",
             "category": t.category.name if t.category else "Uncategorised",
-            "amount": float(t.amount),
+            "amount": t.amount,
             "type": t.type,
         }
         for t in txns
@@ -259,7 +259,7 @@ async def get_largest_transactions(
             "date": str(t.transaction_date),
             "description": t.description or t.merchant_name or "—",
             "category": t.category.name if t.category else "Uncategorised",
-            "amount": float(t.amount),
+            "amount": t.amount,
         }
         for t in txns
     ]
@@ -313,7 +313,7 @@ async def get_recurring_expenses(
         {
             "description": t.description or t.merchant_name or "—",
             "category": t.category.name if t.category else "Uncategorised",
-            "amount": float(t.amount),
+            "amount": t.amount,
             "recurrence": t.recurrence_type or "recurring",
         }
         for t in txns
@@ -330,8 +330,8 @@ async def get_goal_progress(
     goals = result.scalars().all()
     output = []
     for g in goals:
-        target = float(g.target_amount)
-        current = float(g.current_amount)
+        target = g.target_amount
+        current = g.current_amount
         pct = (current / target * 100) if target > 0 else 0
         remaining = target - current
         output.append(
@@ -496,6 +496,7 @@ _KEYWORD_MAP: dict[str, list[str]] = {
     "recurring_expenses":  ["recurring", "subscription", "subscriptions", "regular", "monthly payment"],
     "goal_progress":       ["goal", "goals", "target", "saving for", "savings goal"],
     "portfolio_summary":   ["portfolio", "investment", "investments", "stock", "holding", "holdings", "gain", "loss", "returns"],
+    "screen_stocks":       ["screener", "screen", "below", "less than", "greater than", "performing well", "stocks below", "stocks under", "buy"],
 }
 
 
@@ -582,7 +583,7 @@ def _format_context(data: dict[str, Any]) -> str:
             for r in recur[:10]:
                 lines.append(f"  {r['description']} | {r['category']} | {_format_inr(r['amount'])} ({r['recurrence']})")
         else:
-            lines.append("\n[Recurring Expenses]\n  None found.")
+            lines.append("\n[Recurring Expenses]\n  No recurring expenses found.")
 
     if "goal_progress" in data:
         goals = data["goal_progress"]
@@ -705,6 +706,37 @@ def _format_context(data: dict[str, Any]) -> str:
                 f"  Data as of: {i.get('data_timestamp')}",
             ]
 
+    if "company_performance" in data:
+        p = data["company_performance"]
+        err = p.get("error")
+        if err:
+            lines.append(f"\n[Company Performance]\n  {err}")
+        else:
+            cap_cr = round(p.get('market_cap') / 1e7, 2) if p.get('market_cap') else None
+            r1m = p.get('return_1m')
+            r6m = p.get('return_6m')
+            r1y = p.get('return_1y')
+            r1m_str = f"{r1m:+.2f}%" if r1m is not None else 'N/A'
+            r6m_str = f"{r6m:+.2f}%" if r6m is not None else 'N/A'
+            r1y_str = f"{r1y:+.2f}%" if r1y is not None else 'N/A'
+            
+            lines += [
+                f"\n[Company Performance — {p.get('symbol')}]",
+                f"  Company: {p.get('company_name') or 'N/A'}",
+                f"  Sector: {p.get('sector') or 'N/A'}",
+                f"  Industry: {p.get('industry') or 'N/A'}",
+                f"  Latest Price: {'₹' + str(p.get('latest_price')) if p.get('latest_price') else 'N/A'}",
+                f"  1M Return: {r1m_str}",
+                f"  6M Return: {r6m_str}",
+                f"  1Y Return: {r1y_str}",
+                f"  52w High: {p.get('week_52_high') or 'N/A'}",
+                f"  52w Low: {p.get('week_52_low') or 'N/A'}",
+                f"  Market Cap: {'₹' + f'{cap_cr:,.0f} Cr' if cap_cr else 'N/A'}",
+                f"  P/E Ratio: {p.get('pe_ratio') or 'N/A'}",
+                f"  Dividend Yield: {f'{p.get('dividend_yield')*100:.2f}%' if p.get('dividend_yield') else 'N/A'}",
+                f"  Data as of: {p.get('data_timestamp')}",
+            ]
+
     if "portfolio_holding_analysis" in data:
         a = data["portfolio_holding_analysis"]
         h = a.get("holding", {})
@@ -728,6 +760,54 @@ def _format_context(data: dict[str, Any]) -> str:
             lines.append(f"  Market 1Y Return: {ret:+.2f}% ({hist.get('start_date')} → {hist.get('end_date')})")
         lines.append(f"  Data as of: {q.get('data_timestamp', 'N/A')}")
         lines.append("  NOTE: Market data may be delayed. Not real-time.")
+
+    if "screen_stocks" in data:
+        ss = data["screen_stocks"]
+        lines += [
+            f"\n[Stock Screener Results]",
+            f"  Market: {ss.get('query', {}).get('market', 'India')}",
+            f"  Max Share Price: {ss.get('query', {}).get('max_share_price') or 'Any'}",
+            f"  Performance Period: {ss.get('query', {}).get('performance_period')}",
+            "  ---"
+        ]
+        results = ss.get("results", [])
+        if not results:
+            lines.append("  No stocks found matching the criteria.")
+        else:
+            for r in results:
+                lines.append(
+                    f"  {r['symbol']} ({r['company_name']}): "
+                    f"{r['price']} {r['currency']} | Return ({r['performance_period']}): {r['return_percent']:+.2f}%"
+                )
+        lines.append("  NOTE: I can analyze the securities available through the current market-data source, but a complete Indian exchange-wide screening universe has not been configured yet.")
+
+    if "commodity_price" in data:
+        cp = data["commodity_price"]
+        err = cp.get("error")
+        if err:
+            lines.append(f"\n[Commodity Price]\n  {err}")
+        else:
+            currency = cp.get('currency') or ''
+            price = f"{cp['price']:,.2f} {currency}" if cp.get('price') is not None else 'N/A'
+            chg = (
+                f"{'+' if (cp.get('day_change') or 0) >= 0 else ''}"
+                f"{cp['day_change']:,.2f} ({cp['day_change_percent']:+.2f}%)"
+                if cp.get('day_change') is not None else 'N/A'
+            )
+            source = cp.get('source', 'Unknown')
+            timestamp = cp.get('data_timestamp', 'Unknown')
+            
+            lines += [
+                f"\n[Commodity Price — {cp.get('commodity').capitalize()}]",
+                f"  Current Price: {price} per {cp.get('unit')}",
+                f"  Previous Close: {cp.get('previous_close'):,.2f} {currency}" if cp.get('previous_close') else "  Previous Close: N/A",
+                f"  Day Change: {chg}",
+                f"  Exchange: {cp.get('exchange') or 'N/A'}",
+                f"  Source: {source}",
+                f"  Last Updated: {timestamp}",
+                "  Status: Live" if cp.get('available') else "  Status: Unavailable",
+                "  NOTE: This is real-time market data from external APIs. Prices may vary slightly across platforms." if source != "yfinance" else "  NOTE: This may be delayed data from yfinance.",
+            ]
 
     context = "\n".join(lines)
     # Trim to budget
@@ -753,7 +833,11 @@ async def determine_required_tools(
             "tool": {"type": "string"},
             "period": {"type": ["string", "null"]},
             "category": {"type": ["string", "null"]},
-            "limit": {"type": ["integer", "null"]}
+            "limit": {"type": ["integer", "null"]},
+            "ticker": {"type": ["string", "null"]},
+            "ticker2": {"type": ["string", "null"]},
+            "max_price": {"type": ["number", "null"]},
+            "commodity": {"type": ["string", "null"]}
         },
         "required": ["tool"]
     }
@@ -791,11 +875,21 @@ async def build_financial_context(
     """
     tool_req = await determine_required_tools(ai_service, history, question)
     tool_name = tool_req.get("tool", "none")
-    period = tool_req.get("period") or "1y"
+    
+    # Handle default period correctly for screen_stocks vs others
+    period = tool_req.get("period")
+    if not period:
+        if tool_name == "screen_stocks":
+            period = "6mo"
+        else:
+            period = "1y"
+            
     category = tool_req.get("category")
     limit = tool_req.get("limit") or 10
     ticker_raw = tool_req.get("ticker") or ""
     ticker2_raw = tool_req.get("ticker2") or ""
+    max_price = tool_req.get("max_price")
+    commodity_raw = tool_req.get("commodity") or ""
 
     # Resolve tickers (may return None if unrecognised)
     ticker = md.resolve_ticker(ticker_raw) if ticker_raw else None
@@ -860,6 +954,12 @@ async def build_financial_context(
             else:
                 return "=== MARKET DATA ===\nI couldn't determine which company to look up. Please provide the company name or ticker symbol."
 
+        elif tool_name == "get_company_performance":
+            if ticker:
+                collected["company_performance"] = md.get_company_performance(ticker)
+            else:
+                return "=== MARKET DATA ===\nI couldn't determine which company to look up. Please provide the company name or ticker symbol."
+
         elif tool_name == "analyze_portfolio_holding":
             if ticker_raw:
                 collected["portfolio_holding_analysis"] = await analyze_portfolio_holding(
@@ -867,7 +967,16 @@ async def build_financial_context(
                 )
             else:
                 return "=== MARKET DATA ===\nI couldn't determine which holding to analyze. Please specify the stock name (e.g. 'How is my Reliance holding performing?')."
-            
+                
+        elif tool_name == "screen_stocks":
+            collected["screen_stocks"] = md.screen_stocks(max_price, period)
+
+        elif tool_name == "get_commodity_price":
+            if commodity_raw:
+                collected["commodity_price"] = await md.get_commodity_price(commodity_raw)
+            else:
+                return "=== MARKET DATA ===\nI couldn't determine which commodity to look up. Please specify the commodity name (e.g., 'gold', 'silver', 'crude oil')."
+
         elif tool_name == "none":
             pass # No financial context needed
 

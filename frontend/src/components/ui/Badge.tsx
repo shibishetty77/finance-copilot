@@ -9,12 +9,12 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variants: Record<BadgeVariant, string> = {
-  default: 'bg-white/10 text-white/70',
-  income:  'bg-income/15 text-income border border-income/30',
-  expense: 'bg-expense/15 text-expense border border-expense/30',
-  warning: 'bg-warning/15 text-warning border border-warning/30',
-  info:    'bg-info/15 text-info border border-info/30',
-  brand:   'bg-brand-600/20 text-brand-400 border border-brand-500/30',
+  default: 'bg-surface-input text-secondary border border-surface-border',
+  income:  'bg-income/10 text-income border border-income/25',
+  expense: 'bg-expense/10 text-expense border border-expense/25',
+  warning: 'bg-warning/10 text-warning border border-warning/25',
+  info:    'bg-info/10 text-info border border-info/25',
+  brand:   'bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/25',
 };
 
 export function Badge({ variant = 'default', dot = false, className, children, ...props }: BadgeProps) {

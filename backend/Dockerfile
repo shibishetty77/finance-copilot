@@ -16,8 +16,8 @@ RUN uv pip compile pyproject.toml -o requirements.txt && \
 # ── Stage 2: Runtime ──────────────────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
 
-LABEL maintainer="Finance Copilot"
-LABEL description="Finance Copilot FastAPI Backend"
+LABEL maintainer="CortexFi"
+LABEL description="CortexFi FastAPI Backend"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

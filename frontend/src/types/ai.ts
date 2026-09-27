@@ -144,7 +144,7 @@ export interface ListModelsResponse {
   models: string[];
 }
 
-// ── AI Finance Assistant types ────────────────────────────────────────────────
+// ── Cortex AI Assistant types ────────────────────────────────────────────────
 
 /** A single persisted chat message. */
 export interface AssistantMessage {
@@ -154,13 +154,13 @@ export interface AssistantMessage {
   created_at: string;
 }
 
-/** Request to send a message to the AI Finance Assistant. */
+/** Request to send a message to Cortex. */
 export interface AssistantChatRequest {
   message: string;
   conversation_id?: string;
 }
 
-/** Response from the AI Finance Assistant chat endpoint. */
+/** Response from Cortex chat endpoint. */
 export interface AssistantChatResponse {
   response: string;
   conversation_id: string;

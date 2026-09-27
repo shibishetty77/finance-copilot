@@ -187,7 +187,7 @@ export function WatchlistPage() {
           {/* Watchlist Items */}
           <div className="space-y-2">
             {watchlistLoading ? (
-              <p className="text-center text-white/50 py-8">Loading...</p>
+              <p className="text-center text-sm py-8" style={{ color: 'var(--text-muted)' }}>Loading...</p>
             ) : (
               watchlistData?.items.map((item: Watchlist) => (
                 <div
@@ -195,13 +195,13 @@ export function WatchlistPage() {
                   className="flex items-center gap-4 p-3 rounded-xl hover:bg-surface-hover transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white">{item.symbol}</p>
-                    <p className="text-xs text-white/50">
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{item.symbol}</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                       {item.company_name || item.sector || 'No details'}
                     </p>
                   </div>
                   {item.notes && (
-                    <p className="text-xs text-white/50 truncate max-w-32">{item.notes}</p>
+                    <p className="text-xs truncate max-w-32" style={{ color: 'var(--text-muted)' }}>{item.notes}</p>
                   )}
                   <div className="flex gap-2">
                     <Button
@@ -233,7 +233,7 @@ export function WatchlistPage() {
               >
                 Previous
               </Button>
-              <span className="text-sm text-white/50">
+              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Page {filters.page} of {watchlistData.total_pages}
               </span>
               <Button
@@ -300,7 +300,7 @@ export function WatchlistPage() {
         title="Remove from Watchlist"
       >
         <div className="space-y-4">
-          <p className="text-white/70">
+          <p style={{ color: 'var(--text-secondary)' }}>
             Are you sure you want to remove {selectedItem?.symbol} from your watchlist?
           </p>
           <div className="flex justify-end gap-2">

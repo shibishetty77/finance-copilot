@@ -1,4 +1,4 @@
-name: Finance Copilot CI
+name: CortexFi CI
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_DB:       test_financecopilot
+          POSTGRES_DB:       test_cortexfi
           POSTGRES_USER:     test
           POSTGRES_PASSWORD: test
         options: >-
@@ -86,4 +86,4 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://api.financecopilot.onrender.com/api/v1
+          VITE_API_BASE_URL: https://api.cortexfi.onrender.com/api/v1
