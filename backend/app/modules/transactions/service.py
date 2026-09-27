@@ -38,6 +38,13 @@ class TransactionService:
             merchant_name=payload.merchant_name,
             transaction_source="manual",
         )
+        # Ensure tags is properly deserialized from the database
+        if isinstance(transaction.tags, str):
+            import json
+            try:
+                transaction.tags = json.loads(transaction.tags)
+            except:
+                transaction.tags = [transaction.tags]
         return TransactionResponse.model_validate(transaction)
 
     async def get_by_id(self, transaction_id: uuid.UUID, user_id: str) -> TransactionResponse:
@@ -45,6 +52,13 @@ class TransactionService:
         transaction = await self.repo.get_by_id(transaction_id, user_id)
         if not transaction:
             raise NotFoundError("Transaction")
+        # Ensure tags is properly deserialized from the database
+        if isinstance(transaction.tags, str):
+            import json
+            try:
+                transaction.tags = json.loads(transaction.tags)
+            except:
+                transaction.tags = [transaction.tags]
         return TransactionResponse.model_validate(transaction)
 
     async def list_all(
@@ -85,6 +99,15 @@ class TransactionService:
         )
 
         total_pages = (total + page_size - 1) // page_size if total > 0 else 0
+
+        # Ensure tags is properly deserialized for each transaction
+        import json
+        for t in transactions:
+            if isinstance(t.tags, str):
+                try:
+                    t.tags = json.loads(t.tags)
+                except:
+                    t.tags = [t.tags]
 
         return TransactionPaginationResponse(
             total=total,
@@ -130,6 +153,15 @@ class TransactionService:
             return TransactionResponse.model_validate(existing)
 
         updated = await self.repo.update(transaction_id, user_id, values)
+        
+        # Ensure tags is properly deserialized from the database
+        if isinstance(updated.tags, str):
+            import json
+            try:
+                updated.tags = json.loads(updated.tags)
+            except:
+                updated.tags = [updated.tags]
+        
         return TransactionResponse.model_validate(updated)
 
     async def delete(self, transaction_id: uuid.UUID, user_id: str) -> None:

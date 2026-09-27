@@ -32,7 +32,12 @@ VALID_TRANSACTION = {
 # ── Helper to get auth token ─────────────────────────────────────────────────────
 async def get_auth_token(client: AsyncClient) -> str:
     """Register and login a user, return access token."""
-    await client.post("/api/v1/auth/register", json=VALID_USER)
+    # Try to register first (may fail if user already exists due to rate limiting)
+    try:
+        await client.post("/api/v1/auth/register", json=VALID_USER)
+    except:
+        pass  # User may already exist
+    
     resp = await client.post(
         "/api/v1/auth/login",
         json={"email": VALID_USER["email"], "password": VALID_USER["password"]},
